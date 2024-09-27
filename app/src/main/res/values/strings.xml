@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">MyBeer</string>
+    <string name="search_beer">Ricerca birra</string>
 </resources>
