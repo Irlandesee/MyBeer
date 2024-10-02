@@ -9,26 +9,27 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import it.uninsubria.mybeer.R
 import it.uninsubria.mybeer.datamodel.Beer
-import it.uninsubria.mybeer.listeners.BeerClickListener
 
-class BeerListAdapter (
-    private val beerList: List<Beer>,
-    private val listener: BeerClickListener
-    ): RecyclerView.Adapter<BeerViewHolder>(){
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BeerViewHolder{
-            return BeerViewHolder(
-                listener,
-                LayoutInflater.from(parent.context).inflate(R.layout.beer_list, parent, false)
-            )
+class BeerListAdapter(private var beerList: ArrayList<Beer?>):
+    RecyclerView.Adapter<BeerViewHolder>(){
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BeerViewHolder {
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.beer_list, parent, false)
+            return BeerViewHolder(view)
         }
-        override fun getItemCount(): Int{ return beerList.size }
+        override fun getItemCount(): Int = beerList.size
 
         override fun onBindViewHolder(holder: BeerViewHolder, position: Int){
-
+            holder.tvBeerTitle.text = beerList[position]?.beer_name
+            holder.tvBeerStyle.text = beerList[position]?.beer_style
+            holder.tvBeerBrewery.text = beerList[position]?.beer_brewery
+            holder.tvBeerAbv.text = beerList[position]?.beer_abv
+            holder.tvBeerDesc.text = beerList[position]?.beer_desc
         }
+
 }
 
-class BeerViewHolder(listener: BeerClickListener, itemView: View): RecyclerView.ViewHolder(itemView){
+class BeerViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
     private val beerContainer: CardView = itemView.findViewById(R.id.beer_container)
     val tvBeerTitle: TextView = itemView.findViewById(R.id.tvBeerName)
     val tvBeerStyle: TextView = itemView.findViewById(R.id.tvBeerStyle)
@@ -39,7 +40,7 @@ class BeerViewHolder(listener: BeerClickListener, itemView: View): RecyclerView.
 
     init{
         itemView.setOnClickListener{
-            //listener.onClick(bindingAdapterPosition)
+            //listener.onClick()
         }
         itemView.setOnLongClickListener{
             //listener.onLongClick(bindingAdapterPosition, beerContainer)

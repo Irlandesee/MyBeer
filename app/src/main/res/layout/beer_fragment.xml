@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.google.android.material.search.SearchView
+    <SearchView
         android:id="@+id/search_view"
         android:layout_width="wrap_content"
         android:layout_height="66dp"
@@ -20,7 +20,6 @@
         android:iconifiedByDefault="false"
         android:inputType="textCapSentences"
         android:maxWidth="488dp"
-        android:queryBackground="@android:color/transparent"
         android:queryHint="@string/search_beer" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -29,7 +28,7 @@
         android:layout_height="match_parent"
         android:layout_below="@+id/search_view"
         android:layout_centerHorizontal="true"
-        android:maxWidth="488dp"/>
+        android:maxWidth="488dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/add_beer_button"

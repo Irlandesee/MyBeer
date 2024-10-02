@@ -1,73 +1,58 @@
 package it.uninsubria.mybeer.dbHandler
 
-import android.content.ContentValues
-import android.content.Context
-import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteOpenHelper
+import android.content.ContentValues.TAG
+import android.util.Log
+import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.getValue
 import it.uninsubria.mybeer.datamodel.Beer
-import java.util.concurrent.ThreadLocalRandom
-import kotlin.streams.asSequence
 
-class DatabaseHandler(context: Context): SQLiteOpenHelper(
-    context, DATABASE_NAME, null, DATABASE_VERSION){
-    companion object {
+class DatabaseHandler(db: FirebaseDatabase){
+    private val databaseName: String = "https://mybeer-f68c5-default-rtdb.europe-west1.firebasedatabase.app"
+    private lateinit var db: FirebaseDatabase
+    private lateinit var dbRef: DatabaseReference
 
-        private const val DATABASE_NAME = "beer.db"
-        private const val DATABASE_VERSION = 1
-    }
+    val childEventListener = object: ChildEventListener {
 
-    private val STRING_LENGTH = 32
-    private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-
-    private fun genPrimaryKey() =
-        ThreadLocalRandom.current()
-            .ints(STRING_LENGTH.toLong(), 0, charPool.size)
-            .asSequence()
-            .map(charPool::get)
-            .joinToString("")
-
-    override fun onCreate(db: SQLiteDatabase?) {
-        db?.execSQL("create table beers(" +
-                "beer_id varchar(50) primary key," +
-                "beer_name varchar(100) not null, " +
-                "beer_style varchar(100) not null," +
-                "beer_brewery varchar(100)," +
-                "beer_abv float not null," +
-                "beer_ibu float not null, " +
-                "beer_raters integer," +
-                "beer_desc text," +
-                "beer_picture_link);")
-    }
-
-    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        db?.execSQL("drop table if exists beer")
-        onCreate(db)
-    }
-
-    fun insertBeer(beer: Beer){
-        val values = ContentValues().apply{
-            put("beer_id", genPrimaryKey())
-            put("beer_name", beer.beerName)
-            put("beer_style", beer.beerStyle)
-            put("beer_brewery", beer.beerBrewery)
-            put("beer_abv", beer.beerAbv)
-            put("beer_ibu", beer.beerIbu)
-            put("beer_raters", beer.beerRaters)
-            put("beer_desc", beer.beerDesc)
-            put("beer_picture_link", beer.beerPictureLink)
+        override fun onChildAdded(dataSnapshot: DataSnapshot, previousChildName: String?){
+            Log.d(TAG, "OnChildAdded: " + dataSnapshot.key!!)
+            //A new beer has been added, add it to the displayed list
+            val beer = dataSnapshot.getValue<Beer>()
+            println(beer)
         }
-        writableDatabase.insert("beers", null, values)
+
+        override fun onChildChanged(dataSnapshot: DataSnapshot, previousChildName: String?){
+            Log.d(TAG, "onChildChanged: $dataSnapshot.key")
+            //A beer has changed, use the key to determine if we are displaying this beer
+            //and if so display the changed beer
+
+            val newBeer = dataSnapshot.getValue<Beer>()
+            val beerKey = dataSnapshot.key
+        }
+
+        override fun onChildRemoved(dataSnapshot: DataSnapshot){
+            Log.d(TAG, "onChildRemoved:" + dataSnapshot.key!!)
+            //A beer has changed, use the key to determine if we are displaying this beer and
+            //if so remove it
+            val commentKey = dataSnapshot.key
+        }
+
+        override fun onChildMoved(dataSnapshot: DataSnapshot, previousChildName: String?){
+            Log.d(TAG, "onChildMoved:" + dataSnapshot.key!!)
+            //A beer has changed position, use the key to determine if we are displaying this
+            //beer and if so move it
+            val movedBeer = dataSnapshot.getValue<Beer>()
+            val beerKey = dataSnapshot.key
+        }
+
+        override fun onCancelled(dbError: DatabaseError){
+            Log.w(TAG, "onCancelled", dbError.toException())
+            println("Failed to load beers")
+        }
+
     }
-
-    fun updateBeer(beer: Beer){
-        TODO("Not yet implemented")
-    }
-
-    fun deleteBeer(beer: Beer){
-        TODO("Not yet implemented")
-    }
-
-
-
 
 }

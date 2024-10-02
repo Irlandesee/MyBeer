@@ -3,4 +3,10 @@
     <string name="search_beer">Ricerca birra</string>
     <string name="search_beer_via_map">Ricerca birra tramite mappa</string>
     <string name="photo_mode">Fai foto ad una birra</string>
+    <string name="beer_name">Nome della birra</string>
+    <string name="beer_style">Genere della birra</string>
+    <string name="beer_brewery">Birrificio</string>
+    <string name="beer_abv">Percentuale abv</string>
+    <string name="beer_desc">descrizione</string>
+    <string name="beer_image">immagine birra</string>
 </resources>

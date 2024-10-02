@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "392626954797",
+    "project_id": "mybeer-f68c5",
+    "storage_bucket": "mybeer-f68c5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:392626954797:android:6db06585e60cb307e38ea4",
+        "android_client_info": {
+          "package_name": "it.uninsubria.mybeer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBkaK95uN9nDlq2MCg6srZwdZlGyscIGfU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

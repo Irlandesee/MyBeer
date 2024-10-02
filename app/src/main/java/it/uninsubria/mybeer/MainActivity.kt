@@ -23,35 +23,18 @@ class MainActivity : AppCompatActivity() {
 
     val DATABASE_NAME = "https://mybeer-f68c5-default-rtdb.europe-west1.firebasedatabase.app"
     private lateinit var db: FirebaseDatabase
-    private lateinit var dbRef: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-        val beerFragment = BeerFragment()
+        db = FirebaseDatabase.getInstance(DATABASE_NAME)
+        val beerFragment = BeerFragment(db)
+
         supportFragmentManager.beginTransaction().apply{
             replace(R.id.fragmentView, beerFragment)
             commit()
         }
-        db = FirebaseDatabase.getInstance(DATABASE_NAME)
-        dbRef = db.getReference("Altbier-Sticke")
-        getData()
-
-    }
-
-    private fun getData(){
-        dbRef.addValueEventListener(object: ValueEventListener{
-            override fun onDataChange(dataSnapshot: DataSnapshot){
-                val value = dataSnapshot.getValue<Map<String, String>>()
-                println(value)
-            }
-
-            override fun onCancelled(error: DatabaseError){
-                Log.w(TAG, "FAILED TO READ VALUE", error.toException())
-            }
-
-        })
 
     }
 }
