@@ -1,5 +1,6 @@
 package it.uninsubria.mybeer.adapters
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,6 +28,7 @@ class BeerListAdapter(private var beerList: ArrayList<Beer?>):
             holder.tvBeerDesc.text = beerList[position]?.beer_desc
         }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun submitList(beerList: ArrayList<Beer?>){
         this.beerList = beerList
         notifyDataSetChanged()
