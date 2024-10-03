@@ -27,6 +27,11 @@ class BeerListAdapter(private var beerList: ArrayList<Beer?>):
             holder.tvBeerDesc.text = beerList[position]?.beer_desc
         }
 
+    fun submitList(beerList: ArrayList<Beer?>){
+        this.beerList = beerList
+        notifyDataSetChanged()
+    }
+
 }
 
 class BeerViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){

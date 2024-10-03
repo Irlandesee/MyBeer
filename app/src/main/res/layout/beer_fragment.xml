@@ -11,7 +11,7 @@
     <SearchView
         android:id="@+id/search_view"
         android:layout_width="wrap_content"
-        android:layout_height="66dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="61dp"
@@ -26,6 +26,7 @@
         android:id="@+id/recycler_home"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/grey800"
         android:layout_below="@+id/search_view"
         android:layout_centerHorizontal="true"
         android:maxWidth="488dp" />

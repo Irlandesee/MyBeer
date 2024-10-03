@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import android.widget.SearchView
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -39,6 +41,15 @@ class BeerFragment(
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?{
         val view = inflater.inflate(R.layout.beer_fragment, container, false)
 
+        /**
+        ViewCompat.setOnApplyWindowInsetsListener(view.findViewById(R.id.beer_fragment)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, 0, systemBars.right, 0)
+        }
+        **/
+
+
+
         recyclerView = view.findViewById(R.id.recycler_home)
         recyclerView.layoutManager = LinearLayoutManager(context)
         beerListAdapter = BeerListAdapter(beers)
@@ -60,7 +71,7 @@ class BeerFragment(
                         }
 
                         Log.w(TAG, "onDataChange: submitting list: ${l.size}")
-                        beerListAdapter = BeerListAdapter(l)
+                        beerListAdapter.submitList(l)
                     }
 
                     override fun onCancelled(dbError: DatabaseError){
