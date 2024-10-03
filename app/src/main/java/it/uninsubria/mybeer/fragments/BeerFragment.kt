@@ -21,10 +21,13 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.getValue
 import it.uninsubria.mybeer.R
 import it.uninsubria.mybeer.adapters.BeerListAdapter
 import it.uninsubria.mybeer.datamodel.Beer
 import it.uninsubria.mybeer.listeners.BeerClickListener
+import java.security.MessageDigest
+import kotlin.text.Charsets.UTF_8
 
 class BeerFragment(
     private var db: FirebaseDatabase
@@ -58,17 +61,16 @@ class BeerFragment(
         searchView = view.findViewById(R.id.search_view)
         searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener{
             override fun onQueryTextSubmit(query: String?): Boolean{
-                Log.w(TAG, "onQueryTextSubmit: $query")
-                dbRef = db.getReference(query!!)
+                val queryToHex = hashString(query!!.lowercase()).toHex()
+                Log.w(TAG, "onQueryTextSubmit: $queryToHex")
+                dbRef = db.getReference(queryToHex)
 
                 dbRef.addValueEventListener(object: ValueEventListener{
                     override fun onDataChange(dataSnapshot: DataSnapshot){
                         val l: ArrayList<Beer?> = ArrayList()
 
-                        for(child in dataSnapshot.children){
-                            val b: Beer? = child.getValue(Beer::class.java)
-                            l.add(b)
-                        }
+                        dataSnapshot.children
+                            .forEachIndexed{ _, child -> l.add(child.getValue(Beer::class.java))}
 
                         Log.w(TAG, "onDataChange: submitting list: ${l.size}")
                         beerListAdapter.submitList(l)
@@ -92,6 +94,9 @@ class BeerFragment(
 
         return view
     }
+
+    fun ByteArray.toHex() = joinToString(separator = ""){byte -> "%02x".format(byte)}
+    fun hashString(str: String): ByteArray = MessageDigest.getInstance("MD5").digest(str.toByteArray(UTF_8))
 
 
     private val beerClickListener = object: BeerClickListener{
