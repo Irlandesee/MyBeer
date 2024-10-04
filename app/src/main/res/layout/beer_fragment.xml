@@ -8,26 +8,26 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <SearchView
-        android:id="@+id/search_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <AutoCompleteTextView
+        android:id="@+id/autoCompleteView"
+        android:layout_width="379dp"
+        android:layout_height="53dp"
         android:layout_alignParentTop="true"
         android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="61dp"
+        android:layout_marginTop="32dp"
         android:layout_marginBottom="8dp"
         android:background="@color/white"
+        android:hint="@string/search_beer"
         android:iconifiedByDefault="false"
         android:inputType="textCapSentences"
-        android:maxWidth="488dp"
-        android:queryHint="@string/search_beer" />
+        android:maxWidth="488dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_home"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white"
-        android:layout_below="@+id/search_view"
+        android:background="@color/grey800"
+        android:layout_below="@+id/autoCompleteView"
         android:layout_centerHorizontal="true"
         android:maxWidth="488dp" />
 

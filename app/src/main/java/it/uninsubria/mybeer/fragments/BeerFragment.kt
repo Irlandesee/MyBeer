@@ -1,12 +1,16 @@
 package it.uninsubria.mybeer.fragments
 
 import android.content.ContentValues.TAG
+import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.PopupMenu
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
@@ -14,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import android.widget.SearchView
+import android.widget.SimpleCursorAdapter
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.firebase.database.DataSnapshot
@@ -25,8 +30,10 @@ import com.google.firebase.database.getValue
 import it.uninsubria.mybeer.R
 import it.uninsubria.mybeer.adapters.BeerListAdapter
 import it.uninsubria.mybeer.datamodel.Beer
+import it.uninsubria.mybeer.dbHandler.DatabaseHandler
 import it.uninsubria.mybeer.listeners.BeerClickListener
 import java.security.MessageDigest
+import kotlin.math.min
 import kotlin.text.Charsets.UTF_8
 
 class BeerFragment(
@@ -36,68 +43,63 @@ class BeerFragment(
     private lateinit var beerListAdapter: BeerListAdapter
     private lateinit var floatingActionButton: FloatingActionButton
     private var beers: ArrayList<Beer?> = ArrayList()
-    private lateinit var searchView: SearchView
+    private lateinit var autoCompleteView: AutoCompleteTextView
     private lateinit var selectedBeer: Beer
 
+    private lateinit var dbHandlerSQLiteDatabase: DatabaseHandler
     private lateinit var dbRef: DatabaseReference
+
+    private var beerCategories: HashMap<String, String> = HashMap<String, String>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?{
         val view = inflater.inflate(R.layout.beer_fragment, container, false)
 
-        /**
         ViewCompat.setOnApplyWindowInsetsListener(view.findViewById(R.id.beer_fragment)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, 0, systemBars.right, 0)
+            insets
         }
-        **/
 
-
+        dbHandlerSQLiteDatabase = DatabaseHandler(requireContext())
+        beerCategories = dbHandlerSQLiteDatabase.getAllBeerCategories()
 
         recyclerView = view.findViewById(R.id.recycler_home)
         recyclerView.layoutManager = LinearLayoutManager(context)
         beerListAdapter = BeerListAdapter(beers)
         recyclerView.adapter = beerListAdapter
 
-        searchView = view.findViewById(R.id.search_view)
-        searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener{
-            override fun onQueryTextSubmit(query: String?): Boolean{
-                val queryToHex = hashString(query!!.lowercase()).toHex()
-                Log.w(TAG, "onQueryTextSubmit: $queryToHex")
-                dbRef = db.getReference(queryToHex)
-
+        autoCompleteView = view.findViewById(R.id.autoCompleteView)
+        val adapter: ArrayAdapter<String> = ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1)
+        adapter.addAll(beerCategories.values)
+        autoCompleteView.setAdapter(adapter)
+        autoCompleteView.onItemClickListener = AdapterView.OnItemClickListener{
+            parent, view, position, it ->
+                val item = parent.getItemAtPosition(position).toString()
+                val key = beerCategories.filterValues{ it == item }.keys.first()
+                println("item: $item -> $key")
+                dbRef = db.getReference(key)
                 dbRef.addValueEventListener(object: ValueEventListener{
-                    override fun onDataChange(dataSnapshot: DataSnapshot){
+                    override fun onDataChange(snapshot: DataSnapshot) {
                         val l: ArrayList<Beer?> = ArrayList()
-
-                        dataSnapshot.children
-                            .forEachIndexed{ _, child -> l.add(child.getValue(Beer::class.java))}
-
-                        Log.w(TAG, "onDataChange: submitting list: ${l.size}")
+                        snapshot.children.forEachIndexed{_, child -> l.add(child.getValue(Beer::class.java))}
                         beerListAdapter.submitList(l)
                     }
 
-                    override fun onCancelled(dbError: DatabaseError){
-                        Log.w(TAG, "onCancelled: Error reading db, query: $query")
+                    override fun onCancelled(error: DatabaseError) {
+                        TODO("Not yet implemented")
                     }
 
                 })
-                return true
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean{
-                return false
-            }
-
-        })
+        }
 
         floatingActionButton = view.findViewById(R.id.add_beer_button)
 
         return view
     }
 
-    fun ByteArray.toHex() = joinToString(separator = ""){byte -> "%02x".format(byte)}
-    fun hashString(str: String): ByteArray = MessageDigest.getInstance("MD5").digest(str.toByteArray(UTF_8))
-
+    private fun ByteArray.toHex() = joinToString(separator = ""){byte -> "%02x".format(byte)}
+    private fun hashString(str: String): ByteArray = MessageDigest.getInstance("MD5").digest(str.toByteArray(UTF_8))
+    private fun compareLengthThenString(a: String, b: String): Int = compareValuesBy(a, b, {it.length}, {it})
 
     private val beerClickListener = object: BeerClickListener{
 
