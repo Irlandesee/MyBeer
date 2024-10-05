@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import android.widget.SearchView
 import android.widget.SimpleCursorAdapter
+import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.firebase.database.DataSnapshot
@@ -42,15 +43,15 @@ class BeerFragment(
 ): Fragment(), PopupMenu.OnMenuItemClickListener {
     private lateinit var recyclerView: RecyclerView
     private lateinit var beerListAdapter: BeerListAdapter
-    private lateinit var floatingActionButton: FloatingActionButton
     private var beers: ArrayList<Beer?> = ArrayList()
     private lateinit var autoCompleteView: AutoCompleteTextView
     private lateinit var loginButton: ImageButton
-    private lateinit var selectedBeer: Beer
+    private lateinit var floatingActionButton: FloatingActionButton
 
     private lateinit var dbHandlerSQLiteDatabase: DatabaseHandler
     private lateinit var dbRef: DatabaseReference
 
+    private lateinit var selectedBeer: Beer
     private var beerCategories: HashMap<String, String> = HashMap<String, String>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?{
@@ -97,7 +98,16 @@ class BeerFragment(
 
         loginButton = view.findViewById(R.id.loginButton)
 
-        floatingActionButton = view.findViewById(R.id.add_beer_button)
+        floatingActionButton = view.findViewById(R.id.floating_button)
+        floatingActionButton.setOnClickListener{
+            val popupMenu = PopupMenu(requireContext(), floatingActionButton)
+            popupMenu.menuInflater.inflate(R.menu.popup_menu, popupMenu.menu)
+            popupMenu.setOnMenuItemClickListener {
+               menuItem -> Toast.makeText(requireContext(), "$menuItem.title", Toast.LENGTH_SHORT).show()
+                true
+            }
+            popupMenu.show()
+        }
 
         return view
     }
