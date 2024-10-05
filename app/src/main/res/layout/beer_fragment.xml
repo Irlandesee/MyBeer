@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/beer_fragment"
@@ -8,27 +7,43 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <AutoCompleteTextView
-        android:id="@+id/autoCompleteView"
-        android:layout_width="379dp"
-        android:layout_height="53dp"
-        android:layout_alignParentTop="true"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginBottom="8dp"
-        android:background="@color/white"
-        android:hint="@string/search_beer"
-        android:iconifiedByDefault="false"
-        android:inputType="textCapSentences"
-        android:maxWidth="488dp" />
+    <LinearLayout
+        android:id="@+id/topPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <AutoCompleteTextView
+            android:id="@+id/autoCompleteView"
+            android:layout_width="319dp"
+            android:layout_height="53dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="8dp"
+            android:background="@color/white"
+            android:hint="@string/search_beer"
+            android:iconifiedByDefault="false"
+            android:inputType="textCapSentences"
+            android:maxWidth="488dp" />
+
+        <ImageButton
+            android:id="@+id/loginButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_vertical"
+            android:background="@color/white"
+            android:contentDescription="@string/login_button"
+            android:src="@drawable/baseline_account_circle_24" />
+
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_home"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/grey800"
-        android:layout_below="@+id/autoCompleteView"
+        android:layout_below="@+id/topPanel"
         android:layout_centerHorizontal="true"
+        android:background="@color/grey800"
         android:maxWidth="488dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -39,7 +54,6 @@
         android:layout_alignParentBottom="true"
         android:layout_margin="15dp"
         android:contentDescription="TODO"
-        app:shapeAppearance="@style/ShapeAppearanceOverlay.Material3.Button"
-        />
+        app:shapeAppearance="@style/ShapeAppearanceOverlay.Material3.Button" />
 
 </RelativeLayout>

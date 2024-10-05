@@ -9,4 +9,5 @@
     <string name="beer_abv">Percentuale abv</string>
     <string name="beer_desc">descrizione</string>
     <string name="beer_image">immagine birra</string>
+    <string name="login_button">Login</string>
 </resources>

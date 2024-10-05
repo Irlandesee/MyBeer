@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
+import android.widget.ImageButton
 import android.widget.PopupMenu
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
@@ -44,6 +45,7 @@ class BeerFragment(
     private lateinit var floatingActionButton: FloatingActionButton
     private var beers: ArrayList<Beer?> = ArrayList()
     private lateinit var autoCompleteView: AutoCompleteTextView
+    private lateinit var loginButton: ImageButton
     private lateinit var selectedBeer: Beer
 
     private lateinit var dbHandlerSQLiteDatabase: DatabaseHandler
@@ -76,9 +78,10 @@ class BeerFragment(
             parent, view, position, it ->
                 val item = parent.getItemAtPosition(position).toString()
                 val key = beerCategories.filterValues{ it == item }.keys.first()
-                println("item: $item -> $key")
+                //println("item: $item -> $key")
                 dbRef = db.getReference(key)
                 dbRef.addValueEventListener(object: ValueEventListener{
+
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val l: ArrayList<Beer?> = ArrayList()
                         snapshot.children.forEachIndexed{_, child -> l.add(child.getValue(Beer::class.java))}
@@ -86,11 +89,13 @@ class BeerFragment(
                     }
 
                     override fun onCancelled(error: DatabaseError) {
-                        TODO("Not yet implemented")
+                        Log.w(TAG, "error while reading database", error.toException())
                     }
 
                 })
         }
+
+        loginButton = view.findViewById(R.id.loginButton)
 
         floatingActionButton = view.findViewById(R.id.add_beer_button)
 
