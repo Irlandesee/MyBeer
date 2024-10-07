@@ -10,4 +10,6 @@
     <string name="beer_desc">descrizione</string>
     <string name="beer_image">immagine birra</string>
     <string name="login_button">Login</string>
+    <string name="search_beer_category">Ricerca tramite categoria</string>
+    <string name="search_beer_name">Ricerca tramite nome</string>
 </resources>

@@ -23,6 +23,7 @@ import android.widget.SimpleCursorAdapter
 import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.children
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -99,11 +100,22 @@ class BeerFragment(
         loginButton = view.findViewById(R.id.loginButton)
 
         floatingActionButton = view.findViewById(R.id.floating_button)
+        val popupMenu = PopupMenu(requireContext(), floatingActionButton)
+        popupMenu.menuInflater.inflate(R.menu.popup_menu, popupMenu.menu)
+        popupMenu.menu.children.forEach{child -> child.setCheckable(true)}
+        val menuItemCategory = popupMenu.menu.findItem(R.id.fam_item_1)
+        val menuItemName = popupMenu.menu.findItem(R.id.fam_item_2)
         floatingActionButton.setOnClickListener{
-            val popupMenu = PopupMenu(requireContext(), floatingActionButton)
-            popupMenu.menuInflater.inflate(R.menu.popup_menu, popupMenu.menu)
             popupMenu.setOnMenuItemClickListener {
-               menuItem -> Toast.makeText(requireContext(), "$menuItem.title", Toast.LENGTH_SHORT).show()
+               menuItem ->
+                if(menuItem.equals(menuItemCategory)){
+                    menuItemName.setChecked(false)
+                    menuItemCategory.setChecked(true)
+                }else {
+                    menuItemCategory.setChecked(false)
+                    menuItemName.setChecked(true)
+                }
+                Toast.makeText(requireContext(), "$menuItem.title", Toast.LENGTH_LONG).show()
                 true
             }
             popupMenu.show()
