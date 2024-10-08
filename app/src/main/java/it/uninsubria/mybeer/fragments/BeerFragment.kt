@@ -103,15 +103,16 @@ class BeerFragment(
         val popupMenu = PopupMenu(requireContext(), floatingActionButton)
         popupMenu.menuInflater.inflate(R.menu.popup_menu, popupMenu.menu)
         popupMenu.menu.children.forEach{child -> child.setCheckable(true)}
-        val menuItemCategory = popupMenu.menu.findItem(R.id.fam_item_1)
+        val menuItemCategory = popupMenu.menu.findItem(R.id.fam_item_1).setChecked(true)
         val menuItemName = popupMenu.menu.findItem(R.id.fam_item_2)
         floatingActionButton.setOnClickListener{
             popupMenu.setOnMenuItemClickListener {
                menuItem ->
+                // Ricerca per categoria
                 if(menuItem.equals(menuItemCategory)){
                     menuItemName.setChecked(false)
                     menuItemCategory.setChecked(true)
-                }else {
+                }else {//Ricerca per nome
                     menuItemCategory.setChecked(false)
                     menuItemName.setChecked(true)
                 }
