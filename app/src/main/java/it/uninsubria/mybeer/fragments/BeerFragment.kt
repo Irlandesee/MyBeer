@@ -1,7 +1,6 @@
 package it.uninsubria.mybeer.fragments
 
 import android.content.ContentValues.TAG
-import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -11,32 +10,28 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
-import android.widget.ImageButton
 import android.widget.PopupMenu
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.fragment.app.FragmentActivity
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import android.widget.SearchView
-import android.widget.SimpleCursorAdapter
 import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.children
+import androidx.navigation.findNavController
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.getValue
 import it.uninsubria.mybeer.R
 import it.uninsubria.mybeer.adapters.BeerListAdapter
 import it.uninsubria.mybeer.datamodel.Beer
 import it.uninsubria.mybeer.dbHandler.DatabaseHandler
 import it.uninsubria.mybeer.listeners.BeerClickListener
 import java.security.MessageDigest
-import kotlin.math.min
 import kotlin.text.Charsets.UTF_8
 
 class BeerFragment(
@@ -46,8 +41,6 @@ class BeerFragment(
     private lateinit var beerListAdapter: BeerListAdapter
     private var beers: ArrayList<Beer?> = ArrayList()
     private lateinit var autoCompleteView: AutoCompleteTextView
-    private lateinit var loginButton: ImageButton
-    private lateinit var floatingActionButton: FloatingActionButton
 
     private lateinit var dbHandlerSQLiteDatabase: DatabaseHandler
     private lateinit var dbRef: DatabaseReference
@@ -80,7 +73,6 @@ class BeerFragment(
             parent, view, position, it ->
                 val item = parent.getItemAtPosition(position).toString()
                 val key = beerCategories.filterValues{ it == item }.keys.first()
-                //println("item: $item -> $key")
                 dbRef = db.getReference(key)
                 dbRef.addValueEventListener(object: ValueEventListener{
 
@@ -97,30 +89,7 @@ class BeerFragment(
                 })
         }
 
-        loginButton = view.findViewById(R.id.loginButton)
 
-        floatingActionButton = view.findViewById(R.id.floating_button)
-        val popupMenu = PopupMenu(requireContext(), floatingActionButton)
-        popupMenu.menuInflater.inflate(R.menu.popup_menu, popupMenu.menu)
-        popupMenu.menu.children.forEach{child -> child.setCheckable(true)}
-        val menuItemCategory = popupMenu.menu.findItem(R.id.fam_item_1).setChecked(true)
-        val menuItemName = popupMenu.menu.findItem(R.id.fam_item_2)
-        floatingActionButton.setOnClickListener{
-            popupMenu.setOnMenuItemClickListener {
-               menuItem ->
-                // Ricerca per categoria
-                if(menuItem.equals(menuItemCategory)){
-                    menuItemName.setChecked(false)
-                    menuItemCategory.setChecked(true)
-                }else {//Ricerca per nome
-                    menuItemCategory.setChecked(false)
-                    menuItemName.setChecked(true)
-                }
-                Toast.makeText(requireContext(), "$menuItem.title", Toast.LENGTH_LONG).show()
-                true
-            }
-            popupMenu.show()
-        }
 
         return view
     }

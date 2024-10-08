@@ -12,4 +12,8 @@
     <string name="login_button">Login</string>
     <string name="search_beer_category">Ricerca tramite categoria</string>
     <string name="search_beer_name">Ricerca tramite nome</string>
+    <string name="vetrina">Vetrina</string>
+    <string name="login">Login</string>
+    <string name="report_beer">Report beer</string>
+    <string name="search_maps">Search breweries</string>
 </resources>

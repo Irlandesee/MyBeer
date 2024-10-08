@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/fam_item_1"
+        android:id="@+id/fam_item_search_cat"
         android:title="@string/search_beer_category"/>
     <item
-        android:id="@+id/fam_item_2"
-        android:title="@string/search_beer_name" />
+        android:id="@+id/fam_item_vetrina"
+        android:title="@string/vetrina" />
+    <item
+        android:id="@+id/fam_item_login"
+        android:title="@string/login" />
+    <item
+        android:id="@+id/fam_item_report_beer"
+        android:title="@string/report_beer" />
+    <item android:id="@+id/fam_item_maps"
+        android:title="@string/search_maps"/>
 </menu>

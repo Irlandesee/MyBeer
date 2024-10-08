@@ -1136,28 +1136,4 @@ class DatabaseHandler(context: Context): SQLiteOpenHelper(context, DATABASE_NAME
         return beerCategories
     }
 
-    fun getBeerHexCode(hashedBeerName: String): Any {
-        val cursor = readableDatabase.query(
-            "beer_categories",
-            null,
-            null,
-            null,
-            null,
-            null,
-            "id DESC"
-        )
-        while(cursor.moveToNext()){
-            val beerId: String = cursor.getString(BEER_ID_COLUMN_INDEX)
-            val beerHexCodes: String = cursor.getString(BEER_HEX_CODES_COLUMN_INDEX)
-            val hexCodes: List<String> = beerHexCodes.split("|")
-            if(hexCodes.contains(hashedBeerName)){
-                cursor.close()
-                return Pair<String, String>(beerId, hashedBeerName)
-            }
-        }
-        cursor.close()
-        return Unit
-    }
-
-
 }

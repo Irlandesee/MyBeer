@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/beer_fragment">
+    <fragment
+        android:id="@+id/beer_fragment"
+        android:name="it.uninsubria.mybeer.fragments.BeerFragment"
+        android:label="BeerFragment"
+        >
+        <!-- Action to navigate from beer fragment to vetrina fragment-->
+        <action
+            android:id="@+id/action_beer_fragment_to_vetrina_fragment"
+            app:destination="@+id/vetrina_fragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/vetrina_fragment"
+        android:name="it.uninsubria.mybeer.fragments.VetrinaFragment"
+        android:label="VetrinaFragment"
+        >
+        <!-- Action to navigate from vetrina fragment to beer fragment -->
+        <action
+            android:id="@+id/action_vetrina_fragment_to_beer_fragment"
+            app:destination="@+id/beer_fragment" />
+
+    </fragment>
+
+</navigation>

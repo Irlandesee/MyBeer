@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/beer_fragment"
+    android:id="@+id/vetrina_fragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -13,7 +14,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:orientation="horizontal">
-
         <AutoCompleteTextView
             android:id="@+id/autoCompleteView"
             android:layout_width="319dp"
@@ -28,15 +28,13 @@
             android:inputType="textCapSentences"
             android:maxWidth="488dp" />
     </LinearLayout>
-
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_home"
+        android:id="@+id/recycler_vetrina"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/topPanel"
+        android:layout_below="@id/topPanel"
         android:layout_centerHorizontal="true"
         android:background="@color/grey800"
-        android:maxWidth="488dp" />
-
+        android:maxWidth="488dp"/>
 
 </RelativeLayout>

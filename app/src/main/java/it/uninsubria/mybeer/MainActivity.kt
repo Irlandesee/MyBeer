@@ -1,40 +1,71 @@
 package it.uninsubria.mybeer
 
-import android.content.ContentValues.TAG
-import android.content.res.Configuration
 import android.os.Bundle
-import android.util.Log
+import android.widget.PopupMenu
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.google.android.material.navigationrail.NavigationRailView
-import com.google.firebase.Firebase
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
+import androidx.fragment.app.Fragment
+import androidx.navigation.createGraph
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.database
-import com.google.firebase.database.getValue
 import it.uninsubria.mybeer.fragments.BeerFragment
+import it.uninsubria.mybeer.fragments.VetrinaFragment
 
 class MainActivity : AppCompatActivity() {
 
     val DATABASE_NAME = "https://mybeer-f68c5-default-rtdb.europe-west1.firebasedatabase.app"
     private lateinit var db: FirebaseDatabase
-
+    private lateinit var floatingActionButton: FloatingActionButton
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
         db = FirebaseDatabase.getInstance(DATABASE_NAME)
-        val beerFragment = BeerFragment(db)
 
-        supportFragmentManager.beginTransaction().apply{
-            replace(R.id.fragmentView, beerFragment)
-            commit()
+        val beerFragment = BeerFragment(db)
+        val vetrinaFragment = VetrinaFragment()
+        setCurrentFragment(beerFragment)
+
+        floatingActionButton = findViewById<FloatingActionButton>(R.id.floating_button)
+        val popupMenu = PopupMenu(baseContext, floatingActionButton)
+        popupMenu.menuInflater.inflate(R.menu.popup_menu, popupMenu.menu)
+        val menuItemCategory = popupMenu.menu.findItem(R.id.fam_item_search_cat)
+        val menuItemVetrina = popupMenu.menu.findItem(R.id.fam_item_vetrina)
+        val menuItemLogin = popupMenu.menu.findItem(R.id.fam_item_login)
+        val menuItemReportBeer = popupMenu.menu.findItem(R.id.fam_item_report_beer)
+        val menuItemMaps = popupMenu.menu.findItem(R.id.fam_item_maps)
+        floatingActionButton.setOnClickListener{
+            popupMenu.setOnMenuItemClickListener {
+                    menuItem ->
+                // Ricerca per categoria
+                if(menuItem.equals(menuItemCategory)){
+                    setCurrentFragment(beerFragment)
+                }else if(menuItem.equals(menuItemVetrina)){//move to vetrina fragment
+                    setCurrentFragment(vetrinaFragment)
+                }else if(menuItem.equals(menuItemLogin)){//move to login fragment
+                    Toast.makeText(baseContext, "$menuItem.title", Toast.LENGTH_LONG).show()
+                    TODO("Login Fragment")
+                }else if(menuItem.equals(menuItemReportBeer)){//move to report beer fragment
+                    Toast.makeText(baseContext, "$menuItem.title", Toast.LENGTH_LONG).show()
+                    TODO("Report beer Fragment")
+                }else if(menuItem.equals(menuItemMaps)){//move to fragment maps
+                    Toast.makeText(baseContext, "$menuItem.title", Toast.LENGTH_LONG).show()
+                    TODO("maps fragment")
+                }
+                true
+            }
+            popupMenu.show()
         }
 
+
     }
+
+    private fun setCurrentFragment(fragment: Fragment) = supportFragmentManager.beginTransaction().apply{
+        replace(R.id.nav_host_fragment, fragment)
+        commit()
+    }
+
 }

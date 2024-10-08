@@ -18,21 +18,23 @@
         app:layout_constraintTop_toTopOf="parent"
         >
         <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/fragmentView"
+            android:id="@+id/nav_host_fragment"
+            android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_height="0dp"
             android:layout_width="match_parent"
             android:layout_gravity="top"
             android:layout_weight="1"
             tools:layout="@layout/beer_fragment" />
 
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/btmNavigationView"
-            android:layout_width="match_parent"
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/floating_button"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            app:menu="@layout/menu_navigation"
-            tools:ignore="InconsistentLayout" />
-
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="15dp"
+            android:contentDescription="TODO"
+            app:shapeAppearance="@style/ShapeAppearanceOverlay.Material3.Button" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
