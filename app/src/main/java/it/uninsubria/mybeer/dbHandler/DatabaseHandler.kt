@@ -6,12 +6,21 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import it.uninsubria.mybeer.datamodel.Beer
+import it.uninsubria.mybeer.user.User
 import java.security.MessageDigest
 import kotlin.text.Charsets.UTF_8
 
-class DatabaseHandler(context: Context): SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION){
+class DatabaseHandler(context: Context,
+    private val db: FirebaseDatabase,
+): SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION){
     companion object{
+        private lateinit var dbRef: DatabaseReference
         private const val DATABASE_NAME = "beers.db"
         private const val DATABASE_VERSION = 1
         private const val BEER_ID_COLUMN_INDEX = 0
@@ -22,12 +31,81 @@ class DatabaseHandler(context: Context): SQLiteOpenHelper(context, DATABASE_NAME
     override fun onCreate(db: SQLiteDatabase){
         db.execSQL("CREATE TABLE beer_categories(" +
                 "id VARCHAR(32) PRIMARY KEY," +
-                "beer_style TEXT," +
-                "beer_hex_codes TEXT)")
+                "beer_style TEXT)")
+        db.execSQL("CREATE TABLE fav_beer(" +
+                "beer_name_hex TEXT PRIMARY KEY," +
+                "beer_cat_hex TEXT)")
         db.execSQL("CREATE TABLE user(" +
                 "id VARCHAR(32) PRIMARY KEY," +
-                "password VARCHAR(32))")
+                "password VARCHAR(32)," +
+                "name VARCHAR(50), " +
+                "surname VARCHAR(50), " +
+                "beer_id TEXT," +
+                "FOREIGN KEY(beer_id) references fav_beer(beer_bane_hex))")
         initCategories(db)
+        initUser(db)
+    }
+
+    private fun initUser(db: SQLiteDatabase){
+        var favBeerValues = ContentValues().apply{
+            put("beer_name_hex", "19feccc899d54d19cdca36e2d4244163")
+            put("beer_cat_hex", "00d926738d9f033e3ac77204a4c6e5a4")
+        }
+        db.insert("fav_beer", null,favBeerValues)
+        var userValues = ContentValues().apply{
+            put("id", "mattialun")
+            put("password", "pwd1234")
+            put("name", "mattia")
+            put("surname", "lunardi")
+            put("beer_id", "19feccc899d54d19cdca36e2d4244163")
+        }
+        db.insert("user", null, userValues)
+    }
+
+    fun getUser(): User {
+        val user: User = User()
+        val userCursor = readableDatabase.query(
+            "user",
+            null,
+            null,
+            null,
+            null,
+            null,
+            "id ASC")
+
+        user.setUserId(userCursor.getString(0))
+        user.setPassword(userCursor.getString(1))
+        user.setName(userCursor.getString(3))
+        user.setSurname(userCursor.getString(4))
+        userCursor.close()
+
+        val favBeerCursor = readableDatabase.query(
+            "fav_beer",
+            null,
+            null,
+            null,
+            null,
+            null,
+            "beer_name_hex ASC")
+
+        val favBeers: ArrayList<Pair<String, String>> = ArrayList<Pair<String, String>>()
+        while(favBeerCursor.moveToNext()){
+            favBeers.add(Pair<String, String>(
+                    favBeerCursor.getString(0),
+                    favBeerCursor.getString(1))) }
+        favBeerCursor.close()
+
+        val beers: ArrayList<Beer?> = ArrayList()
+        dbRef.addValueEventListener(object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot){ snapshot.children.forEachIndexed{_, child -> beers.add(child.getValue(Beer::class.java))} }
+            override fun onCancelled(error: DatabaseError){ Log.w(TAG, "error white reading database", error.toException()) }
+        })
+
+        for(p in favBeers){
+            dbRef = db.getReference(p.second + "/" + p.first)
+        }
+        user.setFavBeers(beers)
+        return user
     }
 
     private fun initCategories(db: SQLiteDatabase){

@@ -35,14 +35,15 @@ import java.security.MessageDigest
 import kotlin.text.Charsets.UTF_8
 
 class BeerFragment(
-    private var db: FirebaseDatabase
+    private val db: FirebaseDatabase,
+    private val handler: DatabaseHandler
 ): Fragment(), PopupMenu.OnMenuItemClickListener {
     private lateinit var recyclerView: RecyclerView
     private lateinit var beerListAdapter: BeerListAdapter
     private var beers: ArrayList<Beer?> = ArrayList()
     private lateinit var autoCompleteView: AutoCompleteTextView
 
-    private lateinit var dbHandlerSQLiteDatabase: DatabaseHandler
+    private lateinit var sqLiteHandler: DatabaseHandler
     private lateinit var dbRef: DatabaseReference
 
     private lateinit var selectedBeer: Beer
@@ -57,8 +58,8 @@ class BeerFragment(
             insets
         }
 
-        dbHandlerSQLiteDatabase = DatabaseHandler(requireContext())
-        beerCategories = dbHandlerSQLiteDatabase.getAllBeerCategories()
+        sqLiteHandler = handler
+        beerCategories = sqLiteHandler.getAllBeerCategories()
 
         recyclerView = view.findViewById(R.id.recycler_home)
         recyclerView.layoutManager = LinearLayoutManager(context)

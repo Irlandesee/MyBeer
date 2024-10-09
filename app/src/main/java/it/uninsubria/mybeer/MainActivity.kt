@@ -1,5 +1,6 @@
 package it.uninsubria.mybeer
 
+import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.widget.PopupMenu
 import android.widget.Toast
@@ -11,21 +12,25 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.FirebaseDatabase
+import it.uninsubria.mybeer.dbHandler.DatabaseHandler
 import it.uninsubria.mybeer.fragments.BeerFragment
 import it.uninsubria.mybeer.fragments.VetrinaFragment
 
 class MainActivity : AppCompatActivity() {
 
-    val DATABASE_NAME = "https://mybeer-f68c5-default-rtdb.europe-west1.firebasedatabase.app"
+    private val DATABASE_NAME = "https://mybeer-f68c5-default-rtdb.europe-west1.firebasedatabase.app"
     private lateinit var db: FirebaseDatabase
     private lateinit var floatingActionButton: FloatingActionButton
+    private lateinit var sqLiteHandler: DatabaseHandler
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
         db = FirebaseDatabase.getInstance(DATABASE_NAME)
+        sqLiteHandler = DatabaseHandler(baseContext)
 
-        val beerFragment = BeerFragment(db)
+        val beerFragment = BeerFragment(db, sqLiteHandler)
         val vetrinaFragment = VetrinaFragment()
         setCurrentFragment(beerFragment)
 
