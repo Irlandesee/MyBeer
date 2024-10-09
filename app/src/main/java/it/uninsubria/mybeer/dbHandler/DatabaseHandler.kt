@@ -47,12 +47,12 @@ class DatabaseHandler(context: Context,
     }
 
     private fun initUser(db: SQLiteDatabase){
-        var favBeerValues = ContentValues().apply{
+        val favBeerValues = ContentValues().apply{
             put("beer_name_hex", "19feccc899d54d19cdca36e2d4244163")
             put("beer_cat_hex", "00d926738d9f033e3ac77204a4c6e5a4")
         }
         db.insert("fav_beer", null,favBeerValues)
-        var userValues = ContentValues().apply{
+        val userValues = ContentValues().apply{
             put("id", "mattialun")
             put("password", "pwd1234")
             put("name", "mattia")
@@ -60,6 +60,43 @@ class DatabaseHandler(context: Context,
             put("beer_id", "19feccc899d54d19cdca36e2d4244163")
         }
         db.insert("user", null, userValues)
+    }
+
+    fun getFavBeers(user: User): ArrayList<Beer>{
+        //get beer ids
+        val userId = user.userId
+        val userProjection = arrayOf("beer_id")
+        val userSelection = "id = ?"
+        val userSelectionArgs = arrayOf(userId)
+
+        val userCursor = readableDatabase.query(
+            "user",
+            userProjection,
+            userSelection,
+            userSelectionArgs,
+            null,
+            null,
+            "id DESC"
+        )
+        while(userCursor.moveToNext()){
+
+        }
+
+        //get beer cat
+        val cursor = readableDatabase.query(
+            "fav_beer",
+            null,
+            "beer_name_hex",
+            null,
+            null,
+            null,
+            "beer_name_hex DESC"
+        )
+        while(cursor.moveToNext()){
+
+
+        }
+
     }
 
     fun getUser(): User {

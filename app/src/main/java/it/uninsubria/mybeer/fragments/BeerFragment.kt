@@ -89,9 +89,6 @@ class BeerFragment(
 
                 })
         }
-
-
-
         return view
     }
 
