@@ -5,8 +5,11 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.PopupMenu
+import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -20,7 +23,7 @@ import it.uninsubria.mybeer.adapters.BeerListAdapter
 import it.uninsubria.mybeer.datamodel.Beer
 import it.uninsubria.mybeer.dbHandler.DatabaseHandler
 import it.uninsubria.mybeer.listeners.BeerClickListener
-import it.uninsubria.mybeer.user.User
+import it.uninsubria.mybeer.datamodel.User
 
 class VetrinaFragment(
     private val db: FirebaseDatabase,
@@ -48,7 +51,23 @@ class VetrinaFragment(
 
         recyclerView = view.findViewById(R.id.recycler_vetrina)
         recyclerView.layoutManager = LinearLayoutManager(context)
+        beerListAdapter = BeerListAdapter(handler.getFavBeers(user))
+        recyclerView.adapter = beerListAdapter
 
+        autoCompleteView = view.findViewById(R.id.autoCompleteView)
+        val adapter: ArrayAdapter<String> = ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1)
+        val favBeerCategories: ArrayList<String> = ArrayList()
+        beers.forEach{ b ->
+            if (b != null) {
+                b.beer_style?.let { favBeerCategories.add(it) }
+            }
+        }
+        adapter.addAll(favBeerCategories)
+        autoCompleteView.onItemClickListener = AdapterView.OnItemClickListener{
+            parent, view, position, it ->
+                val item = parent.getItemAtPosition(position).toString()
+                Toast.makeText(requireContext(), "Item Clicked $item", Toast.LENGTH_LONG).show()
+        }
 
 
         return view

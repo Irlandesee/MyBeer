@@ -79,7 +79,9 @@ class BeerFragment(
 
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val l: ArrayList<Beer?> = ArrayList()
-                        snapshot.children.forEachIndexed{_, child -> l.add(child.getValue(Beer::class.java))}
+                        snapshot.children.forEach{ child ->
+                            Log.w(TAG, "$child.value")
+                            l.add(child.getValue(Beer::class.java))}
                         beerListAdapter.submitList(l)
                     }
 

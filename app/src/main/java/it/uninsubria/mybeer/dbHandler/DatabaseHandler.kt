@@ -12,7 +12,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import it.uninsubria.mybeer.datamodel.Beer
-import it.uninsubria.mybeer.user.User
+import it.uninsubria.mybeer.datamodel.User
 import java.security.MessageDigest
 import kotlin.text.Charsets.UTF_8
 
@@ -62,9 +62,57 @@ class DatabaseHandler(context: Context,
         db.insert("user", null, userValues)
     }
 
-    fun getFavBeers(user: User): ArrayList<Beer>{
+    private fun parseSingleBeer(child: DataSnapshot): Beer{
+        Log.w(TAG, "$child.value")
+        var beerName: String = ""
+        var beerDesc: String = ""
+        var beerAbv: String = ""
+        var beerBrewery: String = ""
+        var beerCatHex: String = ""
+        var beerIbu: String = ""
+        var beerNameHex: String = ""
+        var beerRaters: String = ""
+        var beerPictureLink: String = ""
+        var beerStyle = ""
+
+        when (child.key) {
+            "beer_name" -> {
+                beerName = child.value.toString()
+            }
+            "beer_desc" -> {
+                beerDesc = child.value.toString()
+            }
+            "beer_abv" -> {
+                beerAbv = child.value.toString()
+            }
+            "beer_brewery" -> {
+                beerBrewery = child.value.toString()
+            }
+            "beer_cat_hex" -> {
+                beerCatHex = child.value.toString()
+            }
+            "beer_ibu" -> {
+                beerIbu = child.value.toString()
+            }
+            "beer_name_hex" -> {
+                beerNameHex = child.value.toString()
+            }
+            "beer_raters" -> {
+                beerRaters = child.value.toString()
+            }
+            "beer_picture_link" -> {
+                beerPictureLink = child.value.toString()
+            }
+            "beer_style" -> {
+                beerStyle = child.value.toString()
+            }
+        }
+        return Beer(beerName, beerStyle, beerBrewery, beerAbv, beerIbu, beerRaters, beerDesc, beerPictureLink, beerCatHex, beerNameHex)
+    }
+
+    fun getFavBeers(user: User): ArrayList<Beer?>{
         //get beer ids
-        val userId = user.userId
+        val userId = user.id
         val userProjection = arrayOf("beer_id")
         val userSelection = "id = ?"
         val userSelectionArgs = arrayOf(userId)
@@ -78,29 +126,44 @@ class DatabaseHandler(context: Context,
             null,
             "id DESC"
         )
+        val beerCodes: ArrayList<String> = ArrayList()
         while(userCursor.moveToNext()){
-
+            beerCodes.add(userCursor.getString(0))
         }
+        userCursor.close()
+
 
         //get beer cat
+        val beerProjection = arrayOf("beer_cat_hex")
+        val beerSelection = "beer_name_hex = ?"
+        val beerSelectionArgs: Array<String> = beerCodes.toTypedArray()
+        val beerHexCodes: ArrayList<Pair<String, String>> = ArrayList()
         val cursor = readableDatabase.query(
             "fav_beer",
-            null,
-            "beer_name_hex",
-            null,
+            beerProjection,
+            beerSelection,
+            beerSelectionArgs,
             null,
             null,
             "beer_name_hex DESC"
         )
         while(cursor.moveToNext()){
+            beerHexCodes.add(Pair<String, String>(
+                cursor.getString(0),
+                cursor.getString(1))) }
+        beerHexCodes.forEach{p -> dbRef = db.getReference(p.second + "/" + p.first)}
+        //Query firebase db
+        val beers: ArrayList<Beer?> = ArrayList()
+        dbRef.addValueEventListener(object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot){
+                snapshot.children.forEach { child -> beers.add(parseSingleBeer(child)) } }
+            override fun onCancelled(error: DatabaseError){ Log.w(TAG, "error white reading database", error.toException()) }
+        })
 
-
-        }
-
+        return beers
     }
 
     fun getUser(): User {
-        val user: User = User()
         val userCursor = readableDatabase.query(
             "user",
             null,
@@ -109,11 +172,12 @@ class DatabaseHandler(context: Context,
             null,
             null,
             "id ASC")
+        userCursor.moveToNext()
 
-        user.setUserId(userCursor.getString(0))
-        user.setPassword(userCursor.getString(1))
-        user.setName(userCursor.getString(3))
-        user.setSurname(userCursor.getString(4))
+        val id = userCursor.getString(0)
+        val password = userCursor.getString(1)
+        val name = userCursor.getString(2)
+        val surname = userCursor.getString(3)
         userCursor.close()
 
         val favBeerCursor = readableDatabase.query(
@@ -132,17 +196,15 @@ class DatabaseHandler(context: Context,
                     favBeerCursor.getString(1))) }
         favBeerCursor.close()
 
+        favBeers.forEach{p -> dbRef = db.getReference(p.second + "/" + p.first)}
         val beers: ArrayList<Beer?> = ArrayList()
         dbRef.addValueEventListener(object: ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot){ snapshot.children.forEachIndexed{_, child -> beers.add(child.getValue(Beer::class.java))} }
+            override fun onDataChange(snapshot: DataSnapshot){
+                snapshot.children.forEach { child -> beers.add(parseSingleBeer(child)) } }
             override fun onCancelled(error: DatabaseError){ Log.w(TAG, "error white reading database", error.toException()) }
         })
 
-        for(p in favBeers){
-            dbRef = db.getReference(p.second + "/" + p.first)
-        }
-        user.setFavBeers(beers)
-        return user
+        return User(id, password, name, surname, beers)
     }
 
     private fun initCategories(db: SQLiteDatabase){

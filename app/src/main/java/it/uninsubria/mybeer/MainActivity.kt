@@ -28,10 +28,10 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
         db = FirebaseDatabase.getInstance(DATABASE_NAME)
-        sqLiteHandler = DatabaseHandler(baseContext)
+        sqLiteHandler = DatabaseHandler(baseContext, db)
 
         val beerFragment = BeerFragment(db, sqLiteHandler)
-        val vetrinaFragment = VetrinaFragment()
+        val vetrinaFragment = VetrinaFragment(db, sqLiteHandler)
         setCurrentFragment(beerFragment)
 
         floatingActionButton = findViewById<FloatingActionButton>(R.id.floating_button)
