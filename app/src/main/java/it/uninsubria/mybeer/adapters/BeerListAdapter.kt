@@ -39,6 +39,8 @@ class BeerListAdapter(private var beerList: ArrayList<Beer?>):
         notifyDataSetChanged()
     }
 
+    fun getList(): ArrayList<Beer?>  { return this.beerList }
+
 }
 
 class BeerViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){

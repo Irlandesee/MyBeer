@@ -1,6 +1,8 @@
 package it.uninsubria.mybeer.fragments
 
+import android.content.ContentValues.TAG
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -47,22 +49,28 @@ class VetrinaFragment(
             insets
         }
         this.sqLiteDatabase = handler
-        this.user = this.sqLiteDatabase.getUser()
+        beerListAdapter = BeerListAdapter(beers)
+        this.user = this.sqLiteDatabase.getUser(beerListAdapter)
+        handler.getFavBeers(user, beerListAdapter)
+        beers = beerListAdapter.getList()
 
         recyclerView = view.findViewById(R.id.recycler_vetrina)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        beerListAdapter = BeerListAdapter(handler.getFavBeers(user))
         recyclerView.adapter = beerListAdapter
 
         autoCompleteView = view.findViewById(R.id.autoCompleteView)
         val adapter: ArrayAdapter<String> = ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1)
-        val favBeerCategories: ArrayList<String> = ArrayList()
+        val favBeerCategories: ArrayList<String?> = ArrayList()
         beers.forEach{ b ->
             if (b != null) {
-                b.beer_style?.let { favBeerCategories.add(it) }
+                println(b)
+                favBeerCategories.add(b.beer_style)
             }
         }
+        println(favBeerCategories)
+
         adapter.addAll(favBeerCategories)
+        autoCompleteView.setAdapter(adapter)
         autoCompleteView.onItemClickListener = AdapterView.OnItemClickListener{
             parent, view, position, it ->
                 val item = parent.getItemAtPosition(position).toString()
