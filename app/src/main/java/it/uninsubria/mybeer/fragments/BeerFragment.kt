@@ -21,6 +21,7 @@ import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -29,6 +30,7 @@ import com.google.firebase.database.ValueEventListener
 import it.uninsubria.mybeer.R
 import it.uninsubria.mybeer.adapters.BeerListAdapter
 import it.uninsubria.mybeer.datamodel.Beer
+import it.uninsubria.mybeer.datamodel.User
 import it.uninsubria.mybeer.dbHandler.DatabaseHandler
 import it.uninsubria.mybeer.listeners.BeerClickListener
 import java.security.MessageDigest
@@ -36,7 +38,8 @@ import kotlin.text.Charsets.UTF_8
 
 class BeerFragment(
     private val db: FirebaseDatabase,
-    private val handler: DatabaseHandler
+    private val handler: DatabaseHandler,
+    private val user: User
 ): Fragment(), PopupMenu.OnMenuItemClickListener {
     private lateinit var recyclerView: RecyclerView
     private lateinit var beerListAdapter: BeerListAdapter
@@ -63,7 +66,7 @@ class BeerFragment(
 
         recyclerView = view.findViewById(R.id.recycler_home)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        beerListAdapter = BeerListAdapter(beers)
+        beerListAdapter = BeerListAdapter(beers, beerClickListener)
         recyclerView.adapter = beerListAdapter
 
         autoCompleteView = view.findViewById(R.id.autoCompleteView)
@@ -91,6 +94,10 @@ class BeerFragment(
 
                 })
         }
+
+        //val itemTouchHelperLeft = ItemTouchHelper(swipeLeftCallBack)
+        //itemTouchHelperLeft.attachToRecyclerView(recyclerView)
+
         return view
     }
 
@@ -98,19 +105,20 @@ class BeerFragment(
     private fun hashString(str: String): ByteArray = MessageDigest.getInstance("MD5").digest(str.toByteArray(UTF_8))
     private fun compareLengthThenString(a: String, b: String): Int = compareValuesBy(a, b, {it.length}, {it})
 
+    private fun createPopupBeerMenu(cardView: CardView){
+        val popupMenu = PopupMenu(requireContext(), cardView)
+        //popupMenu.setOnMenuItemClickListener(this)
+        popupMenu.inflate(R.menu.beer_menu)
+        popupMenu.show()
+    }
+
     private val beerClickListener = object: BeerClickListener{
 
-        override fun onClick(index: Int){
-            TODO("Not yet implemented")
-        }
-
         override fun onLongClick(index: Int, cardView: CardView){
-            TODO("Not yet implemented")
+            selectedBeer = beerListAdapter.getList()[index]!!
+            createPopupBeerMenu(cardView)
         }
 
-        override fun onStarClick(index: Int) {
-            TODO("Not yet implemented")
-        }
         override fun onPictureClick(index: Int){
             TODO("Not yet implemented")
         }
@@ -123,5 +131,28 @@ class BeerFragment(
     override fun onMenuItemClick(item: MenuItem?): Boolean{
         TODO("Not yed implemented")
     }
+
+    private val swipeLeftCallBack =
+        object: ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT){
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int){
+                val position = viewHolder.adapterPosition
+                sqLiteHandler.addFavBeer(beers[position]!!, user)
+                Toast.makeText(
+                    requireContext(),
+                    "Beer added to favs",
+                    Toast.LENGTH_LONG)
+                    .show()
+
+            }
+
+        }
 
 }

@@ -16,4 +16,7 @@
     <string name="login">Login</string>
     <string name="report_beer">Report beer</string>
     <string name="search_maps">Search breweries</string>
+    <string name="beer_add_to_fav">Aggiungi ai preferiti</string>
+    <string name="beer_see_details">Vedi dettagli</string>
+    <string name="beer_create_report">Report</string>
 </resources>

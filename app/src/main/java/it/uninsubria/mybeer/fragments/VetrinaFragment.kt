@@ -29,7 +29,8 @@ import it.uninsubria.mybeer.datamodel.User
 
 class VetrinaFragment(
     private val db: FirebaseDatabase,
-    private val handler: DatabaseHandler
+    private val handler: DatabaseHandler,
+    private val user: User
 ) : Fragment(), PopupMenu.OnMenuItemClickListener{
     private lateinit var recyclerView: RecyclerView
     private lateinit var beerListAdapter: BeerListAdapter
@@ -38,7 +39,6 @@ class VetrinaFragment(
     private lateinit var sqLiteDatabase: DatabaseHandler
     private lateinit var dbRef: DatabaseReference
     private lateinit var selectedBeer: Beer
-    private lateinit var user: User
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -49,10 +49,8 @@ class VetrinaFragment(
             insets
         }
         this.sqLiteDatabase = handler
-        beerListAdapter = BeerListAdapter(beers)
-        this.user = this.sqLiteDatabase.getUser(beerListAdapter)
-        handler.getFavBeers(user, beerListAdapter)
-        beers = beerListAdapter.getList()
+        beers = sqLiteDatabase.getFavBeers(user)
+        beerListAdapter = BeerListAdapter(beers, beerClickListener)
 
         recyclerView = view.findViewById(R.id.recycler_vetrina)
         recyclerView.layoutManager = LinearLayoutManager(context)
@@ -61,15 +59,12 @@ class VetrinaFragment(
         autoCompleteView = view.findViewById(R.id.autoCompleteView)
         val adapter: ArrayAdapter<String> = ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1)
         val favBeerCategories: ArrayList<String?> = ArrayList()
-        beers.forEach{ b ->
-            if (b != null) {
-                println(b)
+        beers.forEach{ b -> if (b != null) {
                 favBeerCategories.add(b.beer_style)
             }
         }
-        println(favBeerCategories)
 
-        adapter.addAll(favBeerCategories)
+        adapter.addAll(favBeerCategories.distinct())
         autoCompleteView.setAdapter(adapter)
         autoCompleteView.onItemClickListener = AdapterView.OnItemClickListener{
             parent, view, position, it ->
@@ -83,17 +78,11 @@ class VetrinaFragment(
 
     private val beerClickListener = object: BeerClickListener {
 
-        override fun onClick(index: Int){
-            TODO("Not yet implemented")
-        }
 
         override fun onLongClick(index: Int, cardView: CardView){
             TODO("Not yet implemented")
         }
 
-        override fun onStarClick(index: Int) {
-            TODO("Not yet implemented")
-        }
         override fun onPictureClick(index: Int){
             TODO("Not yet implemented")
         }

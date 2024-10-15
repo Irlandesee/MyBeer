@@ -12,14 +12,17 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import it.uninsubria.mybeer.R
 import it.uninsubria.mybeer.datamodel.Beer
+import it.uninsubria.mybeer.listeners.BeerClickListener
 import kotlinx.coroutines.withContext
 
-class BeerListAdapter(private var beerList: ArrayList<Beer?>):
-    RecyclerView.Adapter<BeerViewHolder>(){
+class BeerListAdapter(
+    private var beerList: ArrayList<Beer?>,
+    private val listener: BeerClickListener
+): RecyclerView.Adapter<BeerViewHolder>(){
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BeerViewHolder {
             val view = LayoutInflater.from(parent.context).inflate(R.layout.beer_list, parent, false)
-            return BeerViewHolder(view)
+            return BeerViewHolder(listener, view)
         }
         override fun getItemCount(): Int = beerList.size
 
@@ -43,7 +46,7 @@ class BeerListAdapter(private var beerList: ArrayList<Beer?>):
 
 }
 
-class BeerViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
+class BeerViewHolder(listener: BeerClickListener, itemView: View): RecyclerView.ViewHolder(itemView){
     private val beerContainer: CardView = itemView.findViewById(R.id.beer_container)
     val tvBeerTitle: TextView = itemView.findViewById(R.id.tvBeerName)
     val tvBeerStyle: TextView = itemView.findViewById(R.id.tvBeerStyle)
@@ -65,11 +68,8 @@ class BeerViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
 
     init{
 
-        itemView.setOnClickListener{
-            //listener.onClick()
-        }
         itemView.setOnLongClickListener{
-            //listener.onLongClick(bindingAdapterPosition, beerContainer)
+            listener.onLongClick(adapterPosition, beerContainer)
             true
         }
         //ivPicture.setOnClickListener{ listener.onPictureClick(bindingAdapterPosition)}

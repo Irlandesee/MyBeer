@@ -6,6 +6,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import androidx.compose.runtime.snapshots.readable
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -35,7 +36,15 @@ class DatabaseHandler(context: Context,
                 "beer_style TEXT)")
         db.execSQL("CREATE TABLE fav_beer(" +
                 "beer_name_hex TEXT PRIMARY KEY," +
-                "beer_cat_hex TEXT)")
+                "beer_cat_hex TEXT," +
+                "beer_abv TEXT," +
+                "beer_brewery TEXT," +
+                "beer_desc TEXT," +
+                "beer_ibu TEXT," +
+                "beer_name TEXT," +
+                "beer_picture_link TEXT," +
+                "beer_raters TEXT," +
+                "beer_style TEXT)")
         db.execSQL("CREATE TABLE user(" +
                 "id VARCHAR(32) PRIMARY KEY," +
                 "password VARCHAR(32)," +
@@ -48,87 +57,99 @@ class DatabaseHandler(context: Context,
     }
 
     private fun initUser(db: SQLiteDatabase){
-        val favBeerValues = ContentValues().apply{
+        var favBeerValues = ContentValues().apply{
             put("beer_name_hex", "19feccc899d54d19cdca36e2d4244163")
             put("beer_cat_hex", "00d926738d9f033e3ac77204a4c6e5a4")
+            put("beer_abv", "5.4% ABV")
+            put("beer_brewery", "Southern Grist Brewing Company")
+            put("beer_desc", "Brown ale brewed with lactose and vanilla beans ")
+            put("beer_ibu", "N/A IBU")
+            put("beer_name", "Bean There, Brown That")
+            put("beer_picture_link", "https://assets.untappd.com/site/beer_logos/beer-1424812_65b25_sm.jpeg")
+            put("beer_raters", "5,228 Ratings")
+            put("beer_style", "Brown Ale - American")
         }
         db.insert("fav_beer", null,favBeerValues)
+        favBeerValues = ContentValues().apply{
+            put("beer_name_hex", "1a4992db7d026560510b29a894e1cdfb")
+            put("beer_cat_hex", "00d926738d9f033e3ac77204a4c6e5a4")
+            put("beer_abv", "5.6% ABV")
+            put("beer_brewery", "South Gate Brewing Company")
+            put("beer_desc", "English style brown ale made with pecans, chocolate malts and British English East Kent Golding hops. Distinct brown sugar and pecan in the nose and on the palate, reminiscent of pecan pie. ")
+            put("beer_ibu", "N/A IBU")
+            put("beer_name", "Oaktown Pecan Brown")
+            put("beer_picture_link", "https://assets.untappd.com/site/assets/images/temp/badge-beer-default.png")
+            put("beer_raters", "1,865 Ratings")
+            put("beer_style", "Brown Ale - American")
+        }
+        db.insert("fav_beer", null, favBeerValues)
         val userValues = ContentValues().apply{
             put("id", "mattialun")
             put("password", "pwd1234")
             put("name", "mattia")
             put("surname", "lunardi")
             put("beer_id", "19feccc899d54d19cdca36e2d4244163")
+            put("beer_id", "1a4992db7d026560510b29a894e1cdfb")
         }
         db.insert("user", null, userValues)
     }
 
 
-    fun getFavBeers(user: User, beerListAdapter: BeerListAdapter){
-        val beerHexCodes: ArrayList<Pair<String, String>> = user.favBeers
-        beerHexCodes.forEach{p -> dbRef = db.getReference(p.second + "/" + p.first)}
-        //Query firebase db
-        var beers: ArrayList<Beer?> = ArrayList()
-        dbRef.addValueEventListener(object: ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot){
-                val tmpBeers: ArrayList<Beer?> = ArrayList()
-                var beerName: String = ""
-                var beerDesc: String = ""
-                var beerAbv: String = ""
-                var beerBrewery: String = ""
-                var beerCatHex: String = ""
-                var beerIbu: String = ""
-                var beerNameHex: String = ""
-                var beerRaters: String = ""
-                var beerPictureLink: String = ""
-                var beerStyle = ""
-
-                snapshot.children.forEach {
-                    child ->
-                        when(child.key){
-                            "beer_name" -> {
-                                beerName = child.value.toString()
-                            }
-                            "beer_desc" -> {
-                                beerDesc = child.value.toString()
-                            }
-                            "beer_abv" -> {
-                                beerAbv = child.value.toString()
-                            }
-                            "beer_brewery" -> {
-                                beerBrewery = child.value.toString()
-                            }
-                            "beer_cat_hex" -> {
-                                beerCatHex = child.value.toString()
-                            }
-                            "beer_ibu" -> {
-                                beerIbu = child.value.toString()
-                            }
-                            "beer_name_hex" -> {
-                                beerNameHex = child.value.toString()
-                            }
-                            "beer_raters" -> {
-                                beerRaters = child.value.toString()
-                            }
-                            "beer_picture_link" -> {
-                                beerPictureLink = child.value.toString()
-                            }
-                            "beer_style" -> {
-                                beerStyle = child.value.toString()
-                            }
-                        }
-                }
-                tmpBeers.add(Beer(beerName, beerStyle, beerBrewery, beerAbv, beerIbu, beerRaters, beerDesc, beerPictureLink, beerCatHex, beerNameHex))
-                beerListAdapter.submitList(tmpBeers)
+    fun getFavBeers(user: User): ArrayList<Beer?>{
+        val result: ArrayList<Beer?> = ArrayList()
+        val favBeers = user.favBeers
+        println(favBeers)
+        favBeers.forEach{
+            (name, cat) ->
+            val selection = "beer_name_hex = ?"
+            val selectionArgs = arrayOf(name)
+            val favBeerCursor = readableDatabase.query(
+                "fav_beer",
+                null,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                "beer_name_hex ASC"
+            )
+            while(favBeerCursor.moveToNext()){
+                val beerNameHex = favBeerCursor.getString(0)
+                val beerCatHex = favBeerCursor.getString(1)
+                val beerAbv = favBeerCursor.getString(2)
+                val beerBrewery = favBeerCursor.getString(3)
+                val beerDesc = favBeerCursor.getString(4)
+                val beerIbu = favBeerCursor.getString(5)
+                val beerName = favBeerCursor.getString(6)
+                val beerPictureLink = favBeerCursor.getString(7)
+                val beerRaters = favBeerCursor.getString(8)
+                val beerStyle = favBeerCursor.getString(9)
+                result.add(Beer(beerName, beerStyle, beerBrewery, beerAbv, beerIbu, beerRaters, beerDesc, beerPictureLink, beerCatHex, beerNameHex))
             }
-            override fun onCancelled(error: DatabaseError){ Log.w(TAG, "error white reading database", error.toException()) }
-        })
-
+            favBeerCursor.close()
+        }
+        return result
     }
 
+    fun addFavBeer(beer: Beer, user: User){
+        val beerValues = ContentValues().apply{
+            put("beer_name_hex", beer.beer_name_hex)
+            put("beer_cat_hex", beer.beer_cat_hex)
+            put("beer_abv", beer.beer_abv)
+            put("beer_brewery", beer.beer_desc)
+            put("beer_ibu", beer.beer_ibu)
+            put("beer_name", beer.beer_name)
+            put("beer_picture_link", beer.beer_picture_link)
+            put("beer_raters", beer.beer_raters)
+            put("beer_style", beer.beer_style)
+        }
+        readableDatabase.insert("fav_beer", null, beerValues)
+        val addFavBeerToUser = "update user set beer_id = beer_id + ? where id = ?"
+        val arr = arrayOf("$beer.beer_name_hex", "$user.id")
+        val c = readableDatabase.rawQuery(addFavBeerToUser, arr)
+        c.close()
+    }
 
-
-    fun getUser(beerListAdapter: BeerListAdapter): User {
+    fun getUser(): User {
         val userCursor = readableDatabase.query(
             "user",
             null,
@@ -1246,6 +1267,7 @@ class DatabaseHandler(context: Context,
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int){
         db.execSQL("DROP TABLE IF EXISTS beer_categories")
+        db.execSQL("DROP TABLE IF EXISTS fav_beer")
         db.execSQL("DROP TABLE IF EXISTS user")
         onCreate(db)
     }

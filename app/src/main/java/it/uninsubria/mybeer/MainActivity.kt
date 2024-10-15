@@ -12,6 +12,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.FirebaseDatabase
+import it.uninsubria.mybeer.datamodel.User
 import it.uninsubria.mybeer.dbHandler.DatabaseHandler
 import it.uninsubria.mybeer.fragments.BeerFragment
 import it.uninsubria.mybeer.fragments.VetrinaFragment
@@ -30,9 +31,10 @@ class MainActivity : AppCompatActivity() {
         db = FirebaseDatabase.getInstance(DATABASE_NAME)
         sqLiteHandler = DatabaseHandler(baseContext, db)
 
-        val beerFragment = BeerFragment(db, sqLiteHandler)
-        val vetrinaFragment = VetrinaFragment(db, sqLiteHandler)
-        setCurrentFragment(beerFragment)
+        val user: User = sqLiteHandler.getUser()
+        val beerFragment = BeerFragment(db, sqLiteHandler, user)
+        val vetrinaFragment = VetrinaFragment(db, sqLiteHandler, user)
+        setCurrentFragment(vetrinaFragment)
 
         floatingActionButton = findViewById<FloatingActionButton>(R.id.floating_button)
         val popupMenu = PopupMenu(baseContext, floatingActionButton)
