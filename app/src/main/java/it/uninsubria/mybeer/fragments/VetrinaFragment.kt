@@ -86,22 +86,35 @@ class VetrinaFragment(
         beerListAdapter.submitList(newBeers)
     }
 
+    private fun createVetrinaPopupBeerMenu(cardView: CardView){
+        val popupMenu = PopupMenu(requireContext(), cardView)
+        popupMenu.setOnMenuItemClickListener(this)
+        popupMenu.inflate(R.menu.vetrina_beer_menu)
+        popupMenu.show()
+    }
+
     private val beerClickListener = object: BeerClickListener {
 
         override fun onLongClick(index: Int, cardView: CardView){
-            TODO("Not yet implemented")
+            selectedBeer = beerListAdapter.getList()[index]!!
+            createVetrinaPopupBeerMenu(cardView)
         }
 
-        override fun onPictureClick(index: Int){
-            TODO("Not yet implemented")
-        }
-
-        override fun onDeleteClick(index: Int){
-            TODO("Not yet implemented")
-        }
     }
 
     override fun onMenuItemClick(item: MenuItem?): Boolean{
-        TODO("Not yed implemented")
+        when(item?.itemId){
+            R.id.beer_menu_rm_from_fav -> {
+                Toast.makeText(requireContext(), "Birra rimossa dalle preferite", Toast.LENGTH_LONG).show()
+                sqLiteDatabase.rmFavBeer(selectedBeer, user)
+                beerListAdapter.submitList(sqLiteDatabase.getFavBeers(user))
+            }
+            R.id.beer_menu_see_details -> {
+                Toast.makeText(requireContext(), "Vedi dettagli birra", Toast.LENGTH_LONG).show()
+                TODO("Not yed implemented")
+            }
+
+        }
+        return true
     }
 }

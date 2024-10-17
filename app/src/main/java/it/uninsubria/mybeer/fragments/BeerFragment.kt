@@ -128,20 +128,13 @@ class BeerFragment(
             createPopupBeerMenu(cardView)
         }
 
-        override fun onPictureClick(index: Int){
-            TODO("Not yet implemented")
-        }
-
-        override fun onDeleteClick(index: Int){
-            TODO("Not yet implemented")
-        }
     }
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onMenuItemClick(item: MenuItem?): Boolean{
         when(item?.itemId){
             R.id.beer_menu_add_to_fav -> {
-                Toast.makeText(requireContext(), "Aggiungendo birra alle preferite", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), "Birra aggiunta alle preferite", Toast.LENGTH_LONG).show()
                 sqLiteHandler.addFavBeer(selectedBeer, user)
             }
             R.id.beer_menu_see_details -> {

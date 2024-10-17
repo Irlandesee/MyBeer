@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/beer_menu_rm_from_fav"
+        android:title="@string/remove_beer_from_fav"/>
+    <item android:id="@+id/beer_menu_see_details"
+        android:title="@string/beer_see_details"/>
+</menu>

@@ -143,6 +143,20 @@ class DatabaseHandler(context: Context,
         queryCursor.close()
     }
 
+    fun rmFavBeer(beer: Beer, user: User){
+        writableDatabase.delete(
+            "fav_beer",
+            "beer_name_hex = ?",
+            arrayOf(beer.beer_name_hex)
+        )
+
+        val rmFavBeerFromUser = "update user set beer_id = replace(beer_id, ?, '') where id = ?"
+        val arr = arrayOf("$beer.beer_name_hex", "$user.id")
+        val rmQueryCursor = writableDatabase.rawQuery(rmFavBeerFromUser, arr)
+        rmQueryCursor.moveToNext()
+        rmQueryCursor.close()
+    }
+
     fun getUser(): User {
         val userCursor = readableDatabase.query(
             "user",
