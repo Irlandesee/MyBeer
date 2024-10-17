@@ -1,5 +1,6 @@
 package it.uninsubria.mybeer.fragments
 
+import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
 import android.os.Bundle
 import android.util.Log
@@ -18,8 +19,12 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResult
+import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.google.firebase.database.DataSnapshot
@@ -27,6 +32,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import it.uninsubria.mybeer.MainActivity
 import it.uninsubria.mybeer.R
 import it.uninsubria.mybeer.adapters.BeerListAdapter
 import it.uninsubria.mybeer.datamodel.Beer
@@ -39,8 +45,7 @@ import kotlin.text.Charsets.UTF_8
 class BeerFragment(
     private val db: FirebaseDatabase,
     private val handler: DatabaseHandler,
-    private val user: User
-): Fragment(), PopupMenu.OnMenuItemClickListener {
+    ): Fragment(), PopupMenu.OnMenuItemClickListener {
     private lateinit var recyclerView: RecyclerView
     private lateinit var beerListAdapter: BeerListAdapter
     private var beers: ArrayList<Beer?> = ArrayList()
@@ -48,9 +53,9 @@ class BeerFragment(
 
     private lateinit var sqLiteHandler: DatabaseHandler
     private lateinit var dbRef: DatabaseReference
-
     private lateinit var selectedBeer: Beer
     private var beerCategories: HashMap<String, String> = HashMap<String, String>()
+    private lateinit var user: User
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?{
         val view = inflater.inflate(R.layout.beer_fragment, container, false)
@@ -60,8 +65,8 @@ class BeerFragment(
             v.setPadding(systemBars.left, 0, systemBars.right, 0)
             insets
         }
-
         sqLiteHandler = handler
+        user = sqLiteHandler.getUser()
         beerCategories = sqLiteHandler.getAllBeerCategories()
 
         recyclerView = view.findViewById(R.id.recycler_home)
@@ -74,31 +79,35 @@ class BeerFragment(
         adapter.addAll(beerCategories.values)
         autoCompleteView.setAdapter(adapter)
         autoCompleteView.onItemClickListener = AdapterView.OnItemClickListener{
-            parent, view, position, it ->
-                val item = parent.getItemAtPosition(position).toString()
-                val key = beerCategories.filterValues{ it == item }.keys.first()
-                dbRef = db.getReference(key)
-                dbRef.addValueEventListener(object: ValueEventListener{
+                parent, _, position, _ ->
+            val item = parent.getItemAtPosition(position).toString()
+            val key = beerCategories.filterValues{ it == item }.keys.first()
+            dbRef = db.getReference(key)
+            dbRef.addValueEventListener(object: ValueEventListener{
 
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        val l: ArrayList<Beer?> = ArrayList()
-                        snapshot.children.forEach{ child ->
-                            Log.w(TAG, "$child.value")
-                            l.add(child.getValue(Beer::class.java))}
-                        beerListAdapter.submitList(l)
-                    }
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val l: ArrayList<Beer?> = ArrayList()
+                    snapshot.children.forEach{ child ->
+                        Log.w(TAG, "$child.value")
+                        l.add(child.getValue(Beer::class.java))}
+                    beerListAdapter.submitList(l)
+                }
 
-                    override fun onCancelled(error: DatabaseError) {
-                        Log.w(TAG, "error while reading database", error.toException())
-                    }
+                override fun onCancelled(error: DatabaseError) {
+                    Log.w(TAG, "error while reading database", error.toException())
+                }
 
-                })
+            })
         }
-
         //val itemTouchHelperLeft = ItemTouchHelper(swipeLeftCallBack)
         //itemTouchHelperLeft.attachToRecyclerView(recyclerView)
 
         return view
+    }
+
+    override fun onStart(){
+        super.onStart()
+        user = sqLiteHandler.getUser()
     }
 
     private fun ByteArray.toHex() = joinToString(separator = ""){byte -> "%02x".format(byte)}
@@ -107,7 +116,7 @@ class BeerFragment(
 
     private fun createPopupBeerMenu(cardView: CardView){
         val popupMenu = PopupMenu(requireContext(), cardView)
-        //popupMenu.setOnMenuItemClickListener(this)
+        popupMenu.setOnMenuItemClickListener(this)
         popupMenu.inflate(R.menu.beer_menu)
         popupMenu.show()
     }
@@ -128,8 +137,23 @@ class BeerFragment(
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onMenuItemClick(item: MenuItem?): Boolean{
-        TODO("Not yed implemented")
+        when(item?.itemId){
+            R.id.beer_menu_add_to_fav -> {
+                Toast.makeText(requireContext(), "Aggiungendo birra alle preferite", Toast.LENGTH_LONG).show()
+                sqLiteHandler.addFavBeer(selectedBeer, user)
+            }
+            R.id.beer_menu_see_details -> {
+                Toast.makeText(requireContext(), "Vedi dettagli birra", Toast.LENGTH_LONG).show()
+                TODO("Not yed implemented")
+            }
+            R.id.beer_menu_create_report -> {
+                Toast.makeText(requireContext(), "Crea rapporto birra", Toast.LENGTH_LONG).show()
+                TODO("Not yed implemented")
+            }
+        }
+        return true
     }
 
     private val swipeLeftCallBack =

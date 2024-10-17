@@ -16,6 +16,10 @@ import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResultListener
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.database.DatabaseReference
@@ -30,15 +34,15 @@ import it.uninsubria.mybeer.datamodel.User
 class VetrinaFragment(
     private val db: FirebaseDatabase,
     private val handler: DatabaseHandler,
-    private val user: User
 ) : Fragment(), PopupMenu.OnMenuItemClickListener{
+    lateinit var beerListAdapter: BeerListAdapter
     private lateinit var recyclerView: RecyclerView
-    private lateinit var beerListAdapter: BeerListAdapter
     private var beers: ArrayList<Beer?> = ArrayList()
     private lateinit var autoCompleteView: AutoCompleteTextView
     private lateinit var sqLiteDatabase: DatabaseHandler
     private lateinit var dbRef: DatabaseReference
     private lateinit var selectedBeer: Beer
+    private lateinit var user: User
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -49,8 +53,10 @@ class VetrinaFragment(
             insets
         }
         this.sqLiteDatabase = handler
+        user = sqLiteDatabase.getUser()
         beers = sqLiteDatabase.getFavBeers(user)
         beerListAdapter = BeerListAdapter(beers, beerClickListener)
+
 
         recyclerView = view.findViewById(R.id.recycler_vetrina)
         recyclerView.layoutManager = LinearLayoutManager(context)
@@ -59,25 +65,28 @@ class VetrinaFragment(
         autoCompleteView = view.findViewById(R.id.autoCompleteView)
         val adapter: ArrayAdapter<String> = ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1)
         val favBeerCategories: ArrayList<String?> = ArrayList()
-        beers.forEach{ b -> if (b != null) {
-                favBeerCategories.add(b.beer_style)
-            }
-        }
+        beers.forEach{ b -> if (b != null) { favBeerCategories.add(b.beer_style) } }
 
         adapter.addAll(favBeerCategories.distinct())
         autoCompleteView.setAdapter(adapter)
         autoCompleteView.onItemClickListener = AdapterView.OnItemClickListener{
-            parent, view, position, it ->
-                val item = parent.getItemAtPosition(position).toString()
-                Toast.makeText(requireContext(), "Item Clicked $item", Toast.LENGTH_LONG).show()
+                parent, _, position, _ ->
+            val item = parent.getItemAtPosition(position).toString()
+            Toast.makeText(requireContext(), "Item Clicked $item", Toast.LENGTH_LONG).show()
         }
-
 
         return view
     }
 
-    private val beerClickListener = object: BeerClickListener {
+    override fun onStart(){
+        super.onStart()
+        user = sqLiteDatabase.getUser()
+        val newBeers = sqLiteDatabase.getFavBeers(user)
+        Log.w(TAG, newBeers.toString())
+        beerListAdapter.submitList(newBeers)
+    }
 
+    private val beerClickListener = object: BeerClickListener {
 
         override fun onLongClick(index: Int, cardView: CardView){
             TODO("Not yet implemented")

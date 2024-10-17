@@ -5,18 +5,10 @@ import android.content.ContentValues.TAG
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.util.Log
-import androidx.compose.runtime.snapshots.readable
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
-import it.uninsubria.mybeer.adapters.BeerListAdapter
 import it.uninsubria.mybeer.datamodel.Beer
 import it.uninsubria.mybeer.datamodel.User
-import java.security.MessageDigest
-import kotlin.text.Charsets.UTF_8
 
 class DatabaseHandler(context: Context,
     private val db: FirebaseDatabase,
@@ -98,7 +90,7 @@ class DatabaseHandler(context: Context,
     fun getFavBeers(user: User): ArrayList<Beer?>{
         val result: ArrayList<Beer?> = ArrayList()
         val favBeers = user.favBeers
-        println(favBeers)
+        //println(favBeers)
         favBeers.forEach{
             (name, cat) ->
             val selection = "beer_name_hex = ?"
@@ -142,11 +134,13 @@ class DatabaseHandler(context: Context,
             put("beer_raters", beer.beer_raters)
             put("beer_style", beer.beer_style)
         }
-        readableDatabase.insert("fav_beer", null, beerValues)
+        writableDatabase.insert("fav_beer", null, beerValues)
+
         val addFavBeerToUser = "update user set beer_id = beer_id + ? where id = ?"
         val arr = arrayOf("$beer.beer_name_hex", "$user.id")
-        val c = readableDatabase.rawQuery(addFavBeerToUser, arr)
-        c.close()
+        val queryCursor = writableDatabase.rawQuery(addFavBeerToUser, arr)
+        queryCursor.moveToNext()
+        queryCursor.close()
     }
 
     fun getUser(): User {
@@ -175,7 +169,7 @@ class DatabaseHandler(context: Context,
             null,
             "beer_name_hex ASC")
 
-        val favBeers: ArrayList<Pair<String, String>> = ArrayList<Pair<String, String>>()
+        val favBeers: ArrayList<Pair<String?, String?>> = ArrayList()
         while(favBeerCursor.moveToNext()){
             favBeers.add(Pair<String, String>(
                     favBeerCursor.getString(0),

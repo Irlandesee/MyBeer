@@ -6,16 +6,20 @@ import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.navigation.createGraph
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.FirebaseDatabase
+import it.uninsubria.mybeer.adapters.BeerListAdapter
+import it.uninsubria.mybeer.datamodel.Beer
 import it.uninsubria.mybeer.datamodel.User
 import it.uninsubria.mybeer.dbHandler.DatabaseHandler
 import it.uninsubria.mybeer.fragments.BeerFragment
 import it.uninsubria.mybeer.fragments.VetrinaFragment
+import it.uninsubria.mybeer.listeners.BeerClickListener
 
 class MainActivity : AppCompatActivity() {
 
@@ -31,9 +35,8 @@ class MainActivity : AppCompatActivity() {
         db = FirebaseDatabase.getInstance(DATABASE_NAME)
         sqLiteHandler = DatabaseHandler(baseContext, db)
 
-        val user: User = sqLiteHandler.getUser()
-        val beerFragment = BeerFragment(db, sqLiteHandler, user)
-        val vetrinaFragment = VetrinaFragment(db, sqLiteHandler, user)
+        val vetrinaFragment = VetrinaFragment(db, sqLiteHandler)
+        val beerFragment = BeerFragment(db, sqLiteHandler)
         setCurrentFragment(vetrinaFragment)
 
         floatingActionButton = findViewById<FloatingActionButton>(R.id.floating_button)
