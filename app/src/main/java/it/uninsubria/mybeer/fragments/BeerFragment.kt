@@ -99,8 +99,6 @@ class BeerFragment(
 
             })
         }
-        //val itemTouchHelperLeft = ItemTouchHelper(swipeLeftCallBack)
-        //itemTouchHelperLeft.attachToRecyclerView(recyclerView)
 
         return view
     }
@@ -139,7 +137,6 @@ class BeerFragment(
             }
             R.id.beer_menu_see_details -> {
                 Toast.makeText(requireContext(), "Vedi dettagli birra", Toast.LENGTH_LONG).show()
-                TODO("Not yed implemented")
             }
             R.id.beer_menu_create_report -> {
                 Toast.makeText(requireContext(), "Crea rapporto birra", Toast.LENGTH_LONG).show()
@@ -149,27 +146,5 @@ class BeerFragment(
         return true
     }
 
-    private val swipeLeftCallBack =
-        object: ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT){
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder
-            ): Boolean {
-                return false
-            }
-
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int){
-                val position = viewHolder.adapterPosition
-                sqLiteHandler.addFavBeer(beers[position]!!, user)
-                Toast.makeText(
-                    requireContext(),
-                    "Beer added to favs",
-                    Toast.LENGTH_LONG)
-                    .show()
-
-            }
-
-        }
 
 }

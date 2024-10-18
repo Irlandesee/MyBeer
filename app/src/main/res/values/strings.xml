@@ -20,4 +20,6 @@
     <string name="beer_see_details">Vedi dettagli</string>
     <string name="beer_create_report">Report</string>
     <string name="remove_beer_from_fav">Rimuovi dai preferiti</string>
+    <string name="beer_raters">Ratings</string>
+    <string name="beer_ibu">Ibu</string>
 </resources>
