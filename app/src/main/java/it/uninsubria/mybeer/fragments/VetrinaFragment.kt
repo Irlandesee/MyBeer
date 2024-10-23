@@ -26,22 +26,29 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import it.uninsubria.mybeer.R
 import it.uninsubria.mybeer.adapters.BeerListAdapter
+import it.uninsubria.mybeer.adapters.ReportListAdapter
 import it.uninsubria.mybeer.datamodel.Beer
+import it.uninsubria.mybeer.datamodel.Report
 import it.uninsubria.mybeer.dbHandler.DatabaseHandler
 import it.uninsubria.mybeer.listeners.BeerClickListener
 import it.uninsubria.mybeer.datamodel.User
+import it.uninsubria.mybeer.listeners.ReportClickListener
 
 class VetrinaFragment(
     private val db: FirebaseDatabase,
     private val handler: DatabaseHandler,
 ) : Fragment(), PopupMenu.OnMenuItemClickListener{
-    lateinit var beerListAdapter: BeerListAdapter
+    private lateinit var beerListAdapter: BeerListAdapter
+    private lateinit var reportListAdapter: ReportListAdapter
     private lateinit var recyclerView: RecyclerView
+    private lateinit var recyclerReportView: RecyclerView
     private var beers: ArrayList<Beer?> = ArrayList()
+    private var reports: ArrayList<Report> = ArrayList()
     private lateinit var autoCompleteView: AutoCompleteTextView
     private lateinit var sqLiteDatabase: DatabaseHandler
     private lateinit var dbRef: DatabaseReference
     private lateinit var selectedBeer: Beer
+    private lateinit var selectedReport: Report
     private lateinit var user: User
 
 
@@ -54,13 +61,19 @@ class VetrinaFragment(
         }
         this.sqLiteDatabase = handler
         user = sqLiteDatabase.getUser()
+
         beers = sqLiteDatabase.getFavBeers(user)
         beerListAdapter = BeerListAdapter(beers, beerClickListener)
+        reportListAdapter = ReportListAdapter(reports, reportClickListener)
 
 
         recyclerView = view.findViewById(R.id.recycler_vetrina)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = beerListAdapter
+
+        recyclerReportView = view.findViewById(R.id.recycler_vetrina_report)
+        recyclerReportView.layoutManager = LinearLayoutManager(context)
+        recyclerReportView.adapter = reportListAdapter
 
         autoCompleteView = view.findViewById(R.id.autoCompleteView)
         val adapter: ArrayAdapter<String> = ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1)
@@ -72,7 +85,7 @@ class VetrinaFragment(
         autoCompleteView.onItemClickListener = AdapterView.OnItemClickListener{
                 parent, _, position, _ ->
             val item = parent.getItemAtPosition(position).toString()
-            Toast.makeText(requireContext(), "Item Clicked $item", Toast.LENGTH_LONG).show()
+            //Toast.makeText(requireContext(), "Item Clicked $item", Toast.LENGTH_LONG).show()
         }
 
         return view
@@ -82,8 +95,11 @@ class VetrinaFragment(
         super.onStart()
         user = sqLiteDatabase.getUser()
         val newBeers = sqLiteDatabase.getFavBeers(user)
-        Log.w(TAG, newBeers.toString())
+        val newReports = sqLiteDatabase.getReports()
+
+        //Log.w(TAG, newBeers.toString())
         beerListAdapter.submitList(newBeers)
+        reportListAdapter.submitList(newReports)
     }
 
     private fun createVetrinaPopupBeerMenu(cardView: CardView){
@@ -98,6 +114,13 @@ class VetrinaFragment(
         override fun onLongClick(index: Int, cardView: CardView){
             selectedBeer = beerListAdapter.getList()[index]!!
             createVetrinaPopupBeerMenu(cardView)
+        }
+    }
+
+    private val reportClickListener = object: ReportClickListener{
+        override fun onLongClick(index: Int, cardView: CardView) {
+            selectedReport = reportListAdapter.getList()[index]
+            Toast.makeText(context, "$selectedReport", Toast.LENGTH_LONG).show()
         }
 
     }

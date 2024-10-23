@@ -28,13 +28,22 @@
             android:inputType="textCapSentences"
             android:maxWidth="488dp" />
     </LinearLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_vetrina"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="550dp"
         android:layout_below="@id/topPanel"
-        android:layout_centerHorizontal="true"
+        android:layout_marginTop="1dp"
         android:background="@color/grey800"
-        android:maxWidth="488dp"/>
+        android:maxWidth="488dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_vetrina_report"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/recycler_vetrina"
+        android:layout_marginTop="2dp"
+        android:background="@color/white" />
 
 </RelativeLayout>

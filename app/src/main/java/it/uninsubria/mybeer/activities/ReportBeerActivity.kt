@@ -10,7 +10,9 @@ import android.Manifest
 import android.content.Intent
 import android.provider.MediaStore
 import android.provider.MediaStore.Audio.Media
+import android.widget.ArrayAdapter
 import android.widget.Spinner
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -19,9 +21,11 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isEmpty
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.FirebaseDatabase
 import it.uninsubria.mybeer.R
+import it.uninsubria.mybeer.datamodel.Report
 import it.uninsubria.mybeer.dbHandler.DatabaseHandler
 import java.io.File
 import java.text.SimpleDateFormat
@@ -55,6 +59,11 @@ class ReportBeerActivity : AppCompatActivity() {
 
         editBeerName = findViewById(R.id.edit_beer_name)
         spinnerBeerStyle = findViewById(R.id.spinner_beer_style)
+        val beerStyles = sqliteHandler.getAllBeerCategories()
+        val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, beerStyles.map{it.value})
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerBeerStyle.adapter = spinnerAdapter
+
         editBeerBrewery = findViewById(R.id.edit_beer_brewery)
         floatingActionButton = findViewById(R.id.fam_report_beer)
         ivBeerPhoto = findViewById(R.id.iv_beer_picture)
@@ -62,6 +71,7 @@ class ReportBeerActivity : AppCompatActivity() {
         val popupMenu = PopupMenu(baseContext, floatingActionButton)
         popupMenu.menuInflater.inflate(R.menu.report_beer_menu, popupMenu.menu)
         val menuItemTakePhoto = popupMenu.menu.findItem(R.id.fam_take_photo)
+        val menuItemSaveReport = popupMenu.menu.findItem(R.id.fam_save_report)
         val menuItemBack = popupMenu.menu.findItem(R.id.fam_back_main)
 
         val takePictureLauncher = registerForActivityResult(
@@ -85,7 +95,23 @@ class ReportBeerActivity : AppCompatActivity() {
                             intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
                             takePictureLauncher.launch(intent)
                         }
-                    }else if(menuItem.equals(menuItemBack)){
+                    }else if(menuItem.equals(menuItemSaveReport)){
+                        if(editBeerName.text.isNotEmpty() && editBeerName.text.isNotEmpty() && !spinnerBeerStyle.isEmpty()){
+                            val intent = Intent()
+                            intent.putExtra("it.uninsubria.mybeer.report", Report(
+                                editBeerName.text.toString(),
+                                spinnerBeerStyle.selectedItem.toString(),
+                                editBeerBrewery.text.toString(),
+                                "tmp",
+                                photoFile.absolutePath
+                            ))
+                            setResult(RESULT_OK, intent)
+                            finish()
+                        }else{
+                            Toast.makeText(baseContext, "Campi non validi", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                    else if(menuItem.equals(menuItemBack)){
                         setResult(RESULT_OK)
                         finish()
                     }

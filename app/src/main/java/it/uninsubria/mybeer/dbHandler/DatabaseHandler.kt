@@ -8,7 +8,11 @@ import android.database.sqlite.SQLiteOpenHelper
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import it.uninsubria.mybeer.datamodel.Beer
+import it.uninsubria.mybeer.datamodel.Report
 import it.uninsubria.mybeer.datamodel.User
+import java.security.MessageDigest
+import kotlin.random.Random
+import kotlin.text.Charsets.UTF_8
 
 class DatabaseHandler(context: Context,
     private val db: FirebaseDatabase,
@@ -44,8 +48,32 @@ class DatabaseHandler(context: Context,
                 "surname VARCHAR(50), " +
                 "beer_id TEXT," +
                 "FOREIGN KEY(beer_id) references fav_beer(beer_bane_hex))")
+        db.execSQL("CREATE TABLE reports(" +
+                "report_id varchar(32) primary key," +
+                "beer_name TEXT," +
+                "beer_style TEXT," +
+                "beer_brewery TEXT," +
+                "notes TEXT," +
+                "beer_picture_link TEXT)")
         initCategories(db)
         initUser(db)
+        initReports(db)
+    }
+
+    private fun initReports(db: SQLiteDatabase){
+        val id = (1..32)
+            .map{ Random.nextInt(0, charPool.size)
+                .let{charPool[it]}}
+            .joinToString("")
+        val reportValues = ContentValues().apply{
+            put("report_id", id)
+            put("beer_name", "Bean There, Brown That")
+            put("beer_style", "Brown Ale - American")
+            put("beer_brewery", "Southern Grist Brewing Company")
+            put("notes", "tmp")
+            put("beer_picture_link", "https://assets.untappd.com/site/beer_logos/beer-1424812_65b25_sm.jpeg")
+        }
+        db.insert("reports", null, reportValues)
     }
 
     private fun initUser(db: SQLiteDatabase){
@@ -141,6 +169,52 @@ class DatabaseHandler(context: Context,
         val queryCursor = writableDatabase.rawQuery(addFavBeerToUser, arr)
         queryCursor.moveToNext()
         queryCursor.close()
+    }
+
+    private fun ByteArray.toHex() = joinToString(separator = ""){byte -> "%02x".format(byte)}
+    private fun hashString(str: String): ByteArray = MessageDigest.getInstance("MD5").digest(str.toByteArray(UTF_8))
+    private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+
+    fun addReport(report: Report, user: User){
+        val id = (1..32)
+            .map{ Random.nextInt(0, charPool.size)
+                .let{charPool[it]}}
+                .joinToString("")
+
+        val reportValues = ContentValues().apply {
+            put("report_id", id)
+            put("beer_name", report.beer_name)
+            put("beer_style", report.beer_style)
+            put("beer_brewery", report.beer_brewery)
+            put("notes", report.notes)
+            put("beer_picture_link", report.beer_picture_link)
+        }
+        writableDatabase.insert("reports", null, reportValues)
+
+    }
+
+    fun getReports(): ArrayList<Report>{
+        val result: ArrayList<Report> = ArrayList()
+        val reportsCursor = readableDatabase.query(
+            "reports",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        )
+        while(reportsCursor.moveToNext()){
+            result.add(Report(
+                reportsCursor.getString(0),
+                reportsCursor.getString(1),
+                reportsCursor.getString(2),
+                reportsCursor.getString(3),
+                reportsCursor.getString(4)))
+        }
+        reportsCursor.close()
+        return result
     }
 
     fun rmFavBeer(beer: Beer, user: User){

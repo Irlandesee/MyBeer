@@ -1,8 +1,10 @@
 package it.uninsubria.mybeer
 
+import android.content.ContentValues.TAG
 import android.content.Intent
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
+import android.util.Log
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -18,6 +20,7 @@ import com.google.firebase.database.FirebaseDatabase
 import it.uninsubria.mybeer.activities.ReportBeerActivity
 import it.uninsubria.mybeer.adapters.BeerListAdapter
 import it.uninsubria.mybeer.datamodel.Beer
+import it.uninsubria.mybeer.datamodel.Report
 import it.uninsubria.mybeer.datamodel.User
 import it.uninsubria.mybeer.dbHandler.DatabaseHandler
 import it.uninsubria.mybeer.fragments.BeerFragment
@@ -55,6 +58,10 @@ class MainActivity : AppCompatActivity() {
                 result ->
             if(result.resultCode == RESULT_OK){
                 Toast.makeText(baseContext, "Report Ok", Toast.LENGTH_LONG).show()
+                if(result.data != null){
+                    val beerReport = result.data!!.getSerializableExtra("it.uninsubria.mybeer.report") as Report
+                    Toast.makeText(baseContext, beerReport.toString(), Toast.LENGTH_LONG).show()
+                }
             }else{
                 Toast.makeText(baseContext, "Report Ko", Toast.LENGTH_LONG).show()
             }
