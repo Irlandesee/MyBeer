@@ -1,10 +1,12 @@
 package it.uninsubria.mybeer
 
+import android.content.Intent
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
@@ -13,6 +15,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.FirebaseDatabase
+import it.uninsubria.mybeer.activities.ReportBeerActivity
 import it.uninsubria.mybeer.adapters.BeerListAdapter
 import it.uninsubria.mybeer.datamodel.Beer
 import it.uninsubria.mybeer.datamodel.User
@@ -47,6 +50,17 @@ class MainActivity : AppCompatActivity() {
         val menuItemLogin = popupMenu.menu.findItem(R.id.fam_item_login)
         val menuItemReportBeer = popupMenu.menu.findItem(R.id.fam_item_report_beer)
         val menuItemMaps = popupMenu.menu.findItem(R.id.fam_item_maps)
+
+        val reportBeerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
+                result ->
+            if(result.resultCode == RESULT_OK){
+                Toast.makeText(baseContext, "Report Ok", Toast.LENGTH_LONG).show()
+            }else{
+                Toast.makeText(baseContext, "Report Ko", Toast.LENGTH_LONG).show()
+            }
+        }
+
+
         floatingActionButton.setOnClickListener{
             popupMenu.setOnMenuItemClickListener {
                     menuItem ->
@@ -55,12 +69,14 @@ class MainActivity : AppCompatActivity() {
                     setCurrentFragment(beerFragment)
                 }else if(menuItem.equals(menuItemVetrina)){//move to vetrina fragment
                     setCurrentFragment(vetrinaFragment)
-                }else if(menuItem.equals(menuItemLogin)){//move to login fragment
+                }else if(menuItem.equals(menuItemLogin)){//move to login activity
                     Toast.makeText(baseContext, "$menuItem.title", Toast.LENGTH_LONG).show()
                     TODO("Login Fragment")
-                }else if(menuItem.equals(menuItemReportBeer)){//move to report beer fragment
+                }else if(menuItem.equals(menuItemReportBeer)){//move to report beer activity
                     Toast.makeText(baseContext, "$menuItem.title", Toast.LENGTH_LONG).show()
-                    TODO("Report beer Fragment")
+                    val intent = Intent(this@MainActivity, ReportBeerActivity::class.java)
+                    reportBeerLauncher.launch(intent)
+
                 }else if(menuItem.equals(menuItemMaps)){//move to fragment maps
                     Toast.makeText(baseContext, "$menuItem.title", Toast.LENGTH_LONG).show()
                     TODO("maps fragment")
