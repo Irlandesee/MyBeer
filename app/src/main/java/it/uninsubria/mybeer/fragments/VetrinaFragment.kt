@@ -67,11 +67,11 @@ class VetrinaFragment(
         reportListAdapter = ReportListAdapter(reports, reportClickListener)
 
 
-        recyclerView = view.findViewById(R.id.recycler_vetrina)
+        recyclerView = view.findViewById(R.id.)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = beerListAdapter
 
-        recyclerReportView = view.findViewById(R.id.recycler_vetrina_report)
+        recyclerReportView = view.findViewById(R.id.)
         recyclerReportView.layoutManager = LinearLayoutManager(context)
         recyclerReportView.adapter = reportListAdapter
 
@@ -140,4 +140,5 @@ class VetrinaFragment(
         }
         return true
     }
+
 }

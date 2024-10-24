@@ -28,22 +28,31 @@
             android:inputType="textCapSentences"
             android:maxWidth="488dp" />
     </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_vetrina"
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragment_recycler_container"
+        android:layout_height="0dp"
         android:layout_width="match_parent"
-        android:layout_height="550dp"
-        android:layout_below="@id/topPanel"
-        android:layout_marginTop="1dp"
-        android:background="@color/grey800"
-        android:maxWidth="488dp" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_vetrina_report"
+        android:layout_gravity="top"
+        android:layout_weight="1"
+        />
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/recycler_vetrina"
-        android:layout_marginTop="2dp"
-        android:background="@color/white" />
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/beerListButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="beerlist"/>
+        <Button
+            android:id="@+id/reportListButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="reportlist"/>
+
+    </LinearLayout>
+
+
+
 
 </RelativeLayout>
