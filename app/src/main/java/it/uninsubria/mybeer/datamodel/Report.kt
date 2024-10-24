@@ -3,6 +3,7 @@ package it.uninsubria.mybeer.datamodel
 import java.io.Serializable
 
 data class Report (
+    var report_id: String = "",
     var beer_name: String? = "",
     var beer_style: String? = "",
     var beer_brewery: String? = "",

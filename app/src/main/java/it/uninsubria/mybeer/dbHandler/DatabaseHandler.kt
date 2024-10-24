@@ -193,6 +193,10 @@ class DatabaseHandler(context: Context,
 
     }
 
+    fun rmReport(reportId: String){
+        TODO("Yet to implement")
+    }
+
     fun getReports(): ArrayList<Report>{
         val result: ArrayList<Report> = ArrayList()
         val reportsCursor = readableDatabase.query(
