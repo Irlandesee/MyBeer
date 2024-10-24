@@ -135,7 +135,7 @@ class VetrinaFragment(
         override fun onLongClick(index: Int, cardView: CardView) {
             selectedReport = reportListAdapter.getList()[index]
             val intent = Intent(context, ViewReportActivity::class.java)
-            //Pass selected report to intent
+            intent.putExtra("it.uninsubria.mybeer.report", selectedReport)
             viewReportLauncher.launch(intent)
         }
 

@@ -175,7 +175,7 @@ class DatabaseHandler(context: Context,
     private fun hashString(str: String): ByteArray = MessageDigest.getInstance("MD5").digest(str.toByteArray(UTF_8))
     private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
 
-    fun addReport(report: Report, user: User){
+    fun addReport(report: Report){
         val id = (1..32)
             .map{ Random.nextInt(0, charPool.size)
                 .let{charPool[it]}}

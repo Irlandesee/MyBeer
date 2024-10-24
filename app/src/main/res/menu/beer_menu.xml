@@ -4,9 +4,6 @@
         android:id="@+id/beer_menu_add_to_fav"
         android:title="@string/beer_add_to_fav" />
     <item
-        android:id="@+id/beer_menu_see_details"
-        android:title="@string/beer_see_details" />
-    <item
         android:id="@+id/beer_menu_create_report"
         android:title="@string/beer_create_report"/>
 

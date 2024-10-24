@@ -28,6 +28,8 @@
         <activity
             android:name=".activities.ReportBeerActivity"
             android:exported="false"/>
+        <activity android:name=".activities.ViewReportActivity"
+            android:exported="false"/>
         <activity
             android:name=".MainActivity"
             android:exported="true">

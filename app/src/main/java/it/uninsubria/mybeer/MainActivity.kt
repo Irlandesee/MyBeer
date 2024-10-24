@@ -61,6 +61,7 @@ class MainActivity : AppCompatActivity() {
                 if(result.data != null){
                     val beerReport = result.data!!.getSerializableExtra("it.uninsubria.mybeer.report") as Report
                     Toast.makeText(baseContext, beerReport.toString(), Toast.LENGTH_LONG).show()
+                    sqLiteHandler.addReport(beerReport)
                 }
             }else{
                 Toast.makeText(baseContext, "Report Ko", Toast.LENGTH_LONG).show()

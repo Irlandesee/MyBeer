@@ -42,6 +42,7 @@ class ReportBeerActivity : AppCompatActivity() {
     private lateinit var editBeerName: EditText
     private lateinit var spinnerBeerStyle: Spinner
     private lateinit var editBeerBrewery: EditText
+    private lateinit var editBeerNotes: EditText
     private lateinit var ivBeerPhoto: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?){
@@ -65,6 +66,7 @@ class ReportBeerActivity : AppCompatActivity() {
         spinnerBeerStyle.adapter = spinnerAdapter
 
         editBeerBrewery = findViewById(R.id.edit_beer_brewery)
+        editBeerNotes = findViewById(R.id.edit_beer_notes)
         floatingActionButton = findViewById(R.id.fam_report_beer)
         ivBeerPhoto = findViewById(R.id.iv_beer_picture)
 
@@ -97,12 +99,19 @@ class ReportBeerActivity : AppCompatActivity() {
                         }
                     }else if(menuItem.equals(menuItemSaveReport)){
                         if(editBeerName.text.isNotEmpty() && editBeerName.text.isNotEmpty() && !spinnerBeerStyle.isEmpty()){
+
+                            val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+                            val id = (1..32)
+                                .map{ kotlin.random.Random.nextInt(0, charPool.size)
+                                    .let{charPool[it]}}
+                                .joinToString("")
                             val intent = Intent()
                             intent.putExtra("it.uninsubria.mybeer.report", Report(
+                                id,
                                 editBeerName.text.toString(),
                                 spinnerBeerStyle.selectedItem.toString(),
                                 editBeerBrewery.text.toString(),
-                                "tmp",
+                                editBeerNotes.text.toString(),
                                 photoFile.absolutePath
                             ))
                             setResult(RESULT_OK, intent)
