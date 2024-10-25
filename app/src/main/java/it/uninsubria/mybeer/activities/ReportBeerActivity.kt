@@ -25,6 +25,7 @@ import androidx.core.view.isEmpty
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.FirebaseDatabase
 import it.uninsubria.mybeer.R
+import it.uninsubria.mybeer.datamodel.Beer
 import it.uninsubria.mybeer.datamodel.Report
 import it.uninsubria.mybeer.dbHandler.DatabaseHandler
 import java.io.File
@@ -45,6 +46,8 @@ class ReportBeerActivity : AppCompatActivity() {
     private lateinit var editBeerNotes: EditText
     private lateinit var ivBeerPhoto: ImageView
 
+    private lateinit var selectedBeer: Beer
+
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -54,6 +57,7 @@ class ReportBeerActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
         firebaseDb = FirebaseDatabase.getInstance(DATABASE_NAME)
         sqliteHandler = DatabaseHandler(baseContext, firebaseDb)
         photoFile = createImageFile()
@@ -69,6 +73,14 @@ class ReportBeerActivity : AppCompatActivity() {
         editBeerNotes = findViewById(R.id.edit_beer_notes)
         floatingActionButton = findViewById(R.id.fam_report_beer)
         ivBeerPhoto = findViewById(R.id.iv_beer_picture)
+
+        val extras: Bundle? = intent.extras
+        if(extras != null){
+            selectedBeer = extras.getSerializable("selected_beer") as Beer
+            editBeerName.setText(selectedBeer.beer_name)
+            spinnerBeerStyle.setSelection(spinnerAdapter.getPosition(selectedBeer.beer_style))
+            editBeerBrewery.setText(selectedBeer.beer_brewery)
+        }
 
         val popupMenu = PopupMenu(baseContext, floatingActionButton)
         popupMenu.menuInflater.inflate(R.menu.report_beer_menu, popupMenu.menu)
@@ -132,8 +144,8 @@ class ReportBeerActivity : AppCompatActivity() {
     }
 
     private fun createImageFile(): File{
-        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss".format(Date()), Locale.getDefault())
-        val imageFileName = "PNG_" + timeStamp + "_"
+        val timeStamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss".format(Date()), Locale.getDefault())
+        val imageFileName = "PNG_" + timeStamp.toString() + "_"
         return File.createTempFile(imageFileName, ".png", filesDir)
     }
 

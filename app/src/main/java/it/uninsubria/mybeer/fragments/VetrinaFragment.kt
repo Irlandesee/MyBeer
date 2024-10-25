@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import it.uninsubria.mybeer.R
+import it.uninsubria.mybeer.activities.ReportBeerActivity
 import it.uninsubria.mybeer.activities.ViewReportActivity
 import it.uninsubria.mybeer.adapters.BeerListAdapter
 import it.uninsubria.mybeer.adapters.ReportListAdapter
@@ -56,6 +57,7 @@ class VetrinaFragment(
     private lateinit var selectedReport: Report
     private lateinit var user: User
     private lateinit var viewReportLauncher: ActivityResultLauncher<Intent>
+    private lateinit var reportBeerLauncher: ActivityResultLauncher<Intent>
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -93,6 +95,13 @@ class VetrinaFragment(
                 parent, _, position, _ ->
             val item = parent.getItemAtPosition(position).toString()
             //Toast.makeText(requireContext(), "Item Clicked $item", Toast.LENGTH_LONG).show()
+        }
+        reportBeerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result ->
+            if(result.resultCode != RESULT_OK && result.data != null){
+                val beerReport = result.data!!.getSerializableExtra("it.uninsubria.mybeer.report") as Report
+                sqLiteDatabase.addReport(beerReport)
+            }
+
         }
 
         viewReportLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
@@ -148,9 +157,11 @@ class VetrinaFragment(
                 sqLiteDatabase.rmFavBeer(selectedBeer, user)
                 beerListAdapter.submitList(sqLiteDatabase.getFavBeers(user))
             }
-            R.id.beer_menu_see_details -> {
-                Toast.makeText(requireContext(), "Vedi dettagli birra", Toast.LENGTH_LONG).show()
-                TODO("Not yed implemented")
+            R.id.beer_menu_create_report-> {
+                Toast.makeText(requireContext(), "Creating report", Toast.LENGTH_LONG).show()
+                val intent = Intent(context, ReportBeerActivity::class.java)
+                intent.putExtra("selected_beer", selectedBeer)
+                reportBeerLauncher.launch(intent)
             }
 
         }

@@ -50,8 +50,6 @@ class MainActivity : AppCompatActivity() {
         popupMenu.menuInflater.inflate(R.menu.popup_menu, popupMenu.menu)
         val menuItemCategory = popupMenu.menu.findItem(R.id.fam_item_search_cat)
         val menuItemVetrina = popupMenu.menu.findItem(R.id.fam_item_vetrina)
-        val menuItemLogin = popupMenu.menu.findItem(R.id.fam_item_login)
-        val menuItemReportBeer = popupMenu.menu.findItem(R.id.fam_item_report_beer)
         val menuItemMaps = popupMenu.menu.findItem(R.id.fam_item_maps)
 
         val reportBeerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
@@ -77,14 +75,6 @@ class MainActivity : AppCompatActivity() {
                     setCurrentFragment(beerFragment)
                 }else if(menuItem.equals(menuItemVetrina)){//move to vetrina fragment
                     setCurrentFragment(vetrinaFragment)
-                }else if(menuItem.equals(menuItemLogin)){//move to login activity
-                    Toast.makeText(baseContext, "$menuItem.title", Toast.LENGTH_LONG).show()
-                    TODO("Login Fragment")
-                }else if(menuItem.equals(menuItemReportBeer)){//move to report beer activity
-                    Toast.makeText(baseContext, "$menuItem.title", Toast.LENGTH_LONG).show()
-                    val intent = Intent(this@MainActivity, ReportBeerActivity::class.java)
-                    reportBeerLauncher.launch(intent)
-
                 }else if(menuItem.equals(menuItemMaps)){//move to fragment maps
                     Toast.makeText(baseContext, "$menuItem.title", Toast.LENGTH_LONG).show()
                     TODO("maps fragment")

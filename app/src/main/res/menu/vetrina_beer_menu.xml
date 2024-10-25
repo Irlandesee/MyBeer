@@ -2,6 +2,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/beer_menu_rm_from_fav"
         android:title="@string/remove_beer_from_fav"/>
-    <item android:id="@+id/beer_menu_see_details"
-        android:title="@string/beer_see_details"/>
+    <item android:id="@+id/beer_menu_create_report"
+        android:title="@string/beer_create_report"/>
 </menu>
