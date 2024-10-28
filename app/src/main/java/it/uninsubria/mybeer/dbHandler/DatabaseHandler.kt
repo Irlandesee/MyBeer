@@ -5,6 +5,7 @@ import android.content.ContentValues.TAG
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.util.Log
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import it.uninsubria.mybeer.datamodel.Beer
@@ -54,27 +55,11 @@ class DatabaseHandler(context: Context,
                 "beer_style TEXT," +
                 "beer_brewery TEXT," +
                 "notes TEXT," +
-                "beer_picture_link TEXT)")
+                "report_picture_link TEXT)")
         initCategories(db)
         initUser(db)
-        initReports(db)
     }
 
-    private fun initReports(db: SQLiteDatabase){
-        val id = (1..32)
-            .map{ Random.nextInt(0, charPool.size)
-                .let{charPool[it]}}
-            .joinToString("")
-        val reportValues = ContentValues().apply{
-            put("report_id", id)
-            put("beer_name", "Bean There, Brown That")
-            put("beer_style", "Brown Ale - American")
-            put("beer_brewery", "Southern Grist Brewing Company")
-            put("notes", "tmp")
-            put("beer_picture_link", "https://assets.untappd.com/site/beer_logos/beer-1424812_65b25_sm.jpeg")
-        }
-        db.insert("reports", null, reportValues)
-    }
 
     private fun initUser(db: SQLiteDatabase){
         var favBeerValues = ContentValues().apply{
@@ -176,19 +161,15 @@ class DatabaseHandler(context: Context,
     private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
 
     fun addReport(report: Report){
-        val id = (1..32)
-            .map{ Random.nextInt(0, charPool.size)
-                .let{charPool[it]}}
-                .joinToString("")
-
         val reportValues = ContentValues().apply {
-            put("report_id", id)
+            put("report_id", report.report_id)
             put("beer_name", report.beer_name)
             put("beer_style", report.beer_style)
             put("beer_brewery", report.beer_brewery)
             put("notes", report.notes)
-            put("beer_picture_link", report.beer_picture_link)
+            put("report_picture_link", report.report_picture_link)
         }
+        Log.w(TAG, "addReport: Report[$reportValues]")
         writableDatabase.insert("reports", null, reportValues)
 
     }
@@ -211,11 +192,13 @@ class DatabaseHandler(context: Context,
         )
         while(reportsCursor.moveToNext()){
             result.add(Report(
-                reportsCursor.getString(0),
-                reportsCursor.getString(1),
-                reportsCursor.getString(2),
-                reportsCursor.getString(3),
-                reportsCursor.getString(4)))
+                reportsCursor.getString(0),//id
+                reportsCursor.getString(1),//name
+                reportsCursor.getString(2),//style
+                reportsCursor.getString(3),//brewery
+                reportsCursor.getString(4),//notes
+                reportsCursor.getString(5)// report picture link
+            ))
         }
         reportsCursor.close()
         return result

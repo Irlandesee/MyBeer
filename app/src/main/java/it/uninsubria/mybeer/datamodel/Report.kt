@@ -8,10 +8,10 @@ data class Report (
     var beer_style: String? = "",
     var beer_brewery: String? = "",
     var notes: String? = "",
-    var beer_picture_link: String? = ""
+    var report_picture_link: String? = ""
 ): Serializable{
     override fun toString(): String {
-       return "Report[$beer_name, $beer_style, $beer_brewery, $notes, $beer_picture_link]"
+       return "Report[$report_id, $beer_name, $beer_style, $beer_brewery, $notes, $report_picture_link]"
     }
 
 }

@@ -1,10 +1,12 @@
 package it.uninsubria.mybeer.fragments
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.content.ContentValues.TAG
 import android.content.Intent
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -18,19 +20,12 @@ import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.fragment.app.FragmentActivity
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.os.bundleOf
+import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.setFragmentResult
-import androidx.lifecycle.Observer
-import androidx.navigation.findNavController
-import androidx.recyclerview.widget.ItemTouchHelper
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -38,6 +33,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import it.uninsubria.mybeer.MainActivity
 import it.uninsubria.mybeer.R
+import it.uninsubria.mybeer.activities.ReportBeerActivity
 import it.uninsubria.mybeer.adapters.BeerListAdapter
 import it.uninsubria.mybeer.datamodel.Beer
 import it.uninsubria.mybeer.datamodel.Report
@@ -45,11 +41,9 @@ import it.uninsubria.mybeer.datamodel.User
 import it.uninsubria.mybeer.dbHandler.DatabaseHandler
 import it.uninsubria.mybeer.listeners.BeerClickListener
 import java.io.File
-import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.text.Charsets.UTF_8
 
 class BeerFragment(
     private val db: FirebaseDatabase,
@@ -65,8 +59,8 @@ class BeerFragment(
     private lateinit var selectedBeer: Beer
     private var beerCategories: HashMap<String, String> = HashMap<String, String>()
     private lateinit var user: User
-    private lateinit var takePictureLauncher: ActivityResultLauncher<Intent>
-    private lateinit var photoFile: File
+
+    private lateinit var reportBeerLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?{
         val view = inflater.inflate(R.layout.beer_fragment, container, false)
@@ -85,17 +79,12 @@ class BeerFragment(
         beerListAdapter = BeerListAdapter(beers, beerClickListener)
         recyclerView.adapter = beerListAdapter
 
-        photoFile = createImageFile()
-
-        takePictureLauncher = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()){
-            result ->
+        reportBeerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){result ->
+            //save report
             if(result.resultCode == RESULT_OK && result.data != null){
-                val newReport = result.data!!.getSerializableExtra("it.uninsubria.mybeer.report") as Report
-                sqLiteHandler.addReport(newReport)
-
+                val beerReport = result.data!!.getSerializableExtra("it.uninsubria.mybeer.report") as Report
+                sqLiteHandler.addReport(beerReport)
             }
-
         }
 
         autoCompleteView = view.findViewById(R.id.autoCompleteView)
@@ -152,23 +141,22 @@ class BeerFragment(
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onMenuItemClick(item: MenuItem?): Boolean{
-        when(item?.itemId){
+        when(item?.itemId) {
             R.id.beer_menu_add_to_fav -> {
-                Toast.makeText(requireContext(), "Birra aggiunta alle preferite", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), "Birra aggiunta alle preferite", Toast.LENGTH_LONG)
+                    .show()
                 sqLiteHandler.addFavBeer(selectedBeer, user)
             }
+
             R.id.beer_menu_create_report -> {
                 Toast.makeText(requireContext(), "Crea rapporto birra", Toast.LENGTH_LONG).show()
-
+                val intent = Intent(context, ReportBeerActivity::class.java)
+                intent.putExtra("selected_beer", selectedBeer)
+                reportBeerLauncher.launch(intent)
             }
         }
         return true
-    }
 
-    private fun createImageFile(): File{
-        val timeStamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss".format(Date()), Locale.getDefault())
-        val imageFileName = "PNG_" + timeStamp + "_"
-        return File.createTempFile(imageFileName, ".png", )
     }
 
 

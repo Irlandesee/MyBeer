@@ -6,12 +6,6 @@
     <item
         android:id="@+id/fam_item_vetrina"
         android:title="@string/vetrina" />
-    <item
-        android:id="@+id/fam_item_login"
-        android:title="@string/login" />
-    <item
-        android:id="@+id/fam_item_report_beer"
-        android:title="@string/report_beer" />
     <item android:id="@+id/fam_item_maps"
         android:title="@string/search_maps"/>
 </menu>
