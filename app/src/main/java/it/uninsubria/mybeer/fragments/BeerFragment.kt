@@ -81,11 +81,9 @@ class BeerFragment(
 
         reportBeerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){result ->
             //save report
-            if(result.resultCode == RESULT_OK){
-                if(result.data != null){
-                    val beerReport = result.data!!.getSerializableExtra("it.uninsubria.mybeer.report") as Report
-                    sqLiteHandler.addReport(beerReport)
-                }
+            if(result.resultCode == RESULT_OK && result.data != null){
+                val beerReport = result.data!!.getSerializableExtra("it.uninsubria.mybeer.report") as Report
+                sqLiteHandler.addReport(beerReport)
             }
         }
 
@@ -159,12 +157,6 @@ class BeerFragment(
         }
         return true
 
-    }
-
-    private fun createImageFile(): File{
-        val timeStamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss".format(Date()), Locale.getDefault())
-        val imageFileName = "PNG_" + timeStamp.toString() + "_"
-        return File.createTempFile(imageFileName, ".png", )
     }
 
 

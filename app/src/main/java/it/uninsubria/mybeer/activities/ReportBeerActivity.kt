@@ -7,9 +7,11 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.PopupMenu
 import android.Manifest
+import android.content.ContentValues.TAG
 import android.content.Intent
 import android.provider.MediaStore
 import android.provider.MediaStore.Audio.Media
+import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.Toast
@@ -22,6 +24,7 @@ import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isEmpty
+import androidx.core.view.isNotEmpty
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.FirebaseDatabase
 import it.uninsubria.mybeer.R
@@ -47,6 +50,7 @@ class ReportBeerActivity : AppCompatActivity() {
     private lateinit var ivBeerPhoto: ImageView
 
     private lateinit var selectedBeer: Beer
+    private var reportId: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
@@ -60,8 +64,13 @@ class ReportBeerActivity : AppCompatActivity() {
 
         firebaseDb = FirebaseDatabase.getInstance(DATABASE_NAME)
         sqliteHandler = DatabaseHandler(baseContext, firebaseDb)
-        photoFile = createImageFile()
 
+        val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+        reportId = (1..32)
+            .map{ kotlin.random.Random.nextInt(0, charPool.size)
+                .let{charPool[it]}}
+            .joinToString("")
+        photoFile = createImageFile()
         editBeerName = findViewById(R.id.edit_beer_name)
         spinnerBeerStyle = findViewById(R.id.spinner_beer_style)
         val beerStyles = sqliteHandler.getAllBeerCategories()
@@ -110,22 +119,19 @@ class ReportBeerActivity : AppCompatActivity() {
                             takePictureLauncher.launch(intent)
                         }
                     }else if(menuItem.equals(menuItemSaveReport)){
-                        if(editBeerName.text.isNotEmpty() && editBeerName.text.isNotEmpty() && !spinnerBeerStyle.isEmpty()){
+                        if(editBeerName.text.isNotEmpty() && editBeerName.text.isNotEmpty() && spinnerBeerStyle.isNotEmpty()){
 
-                            val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-                            val id = (1..32)
-                                .map{ kotlin.random.Random.nextInt(0, charPool.size)
-                                    .let{charPool[it]}}
-                                .joinToString("")
-                            val intent = Intent()
-                            intent.putExtra("it.uninsubria.mybeer.report", Report(
-                                id,
+                            val repResult = Report(
+                                reportId,
                                 editBeerName.text.toString(),
                                 spinnerBeerStyle.selectedItem.toString(),
                                 editBeerBrewery.text.toString(),
                                 editBeerNotes.text.toString(),
                                 photoFile.absolutePath
-                            ))
+                            )
+                            Log.w(TAG, "RepActivity: $repResult.toString()")
+                            val intent = Intent()
+                            intent.putExtra("it.uninsubria.mybeer.report", repResult)
                             setResult(RESULT_OK, intent)
                             finish()
                         }else{
@@ -144,8 +150,7 @@ class ReportBeerActivity : AppCompatActivity() {
     }
 
     private fun createImageFile(): File{
-        val timeStamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss".format(Date()), Locale.getDefault())
-        val imageFileName = "PNG_" + timeStamp.toString() + "_"
+        val imageFileName = "PNG_" + reportId + "_"
         return File.createTempFile(imageFileName, ".png", filesDir)
     }
 

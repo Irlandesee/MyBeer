@@ -52,20 +52,6 @@ class MainActivity : AppCompatActivity() {
         val menuItemVetrina = popupMenu.menu.findItem(R.id.fam_item_vetrina)
         val menuItemMaps = popupMenu.menu.findItem(R.id.fam_item_maps)
 
-        val reportBeerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
-                result ->
-            if(result.resultCode == RESULT_OK){
-                Toast.makeText(baseContext, "Report Ok", Toast.LENGTH_LONG).show()
-                if(result.data != null){
-                    val beerReport = result.data!!.getSerializableExtra("it.uninsubria.mybeer.report") as Report
-                    Toast.makeText(baseContext, beerReport.toString(), Toast.LENGTH_LONG).show()
-                    sqLiteHandler.addReport(beerReport)
-                }
-            }else{
-                Toast.makeText(baseContext, "Report Ko", Toast.LENGTH_LONG).show()
-            }
-        }
-
 
         floatingActionButton.setOnClickListener{
             popupMenu.setOnMenuItemClickListener {
