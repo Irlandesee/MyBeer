@@ -34,6 +34,7 @@ import com.google.firebase.database.ValueEventListener
 import it.uninsubria.mybeer.MainActivity
 import it.uninsubria.mybeer.R
 import it.uninsubria.mybeer.activities.ReportBeerActivity
+import it.uninsubria.mybeer.activities.SearchBreweriesActivity
 import it.uninsubria.mybeer.adapters.BeerListAdapter
 import it.uninsubria.mybeer.datamodel.Beer
 import it.uninsubria.mybeer.datamodel.Report
@@ -61,6 +62,7 @@ class BeerFragment(
     private lateinit var user: User
 
     private lateinit var reportBeerLauncher: ActivityResultLauncher<Intent>
+    private lateinit var searchBreweryLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?{
         val view = inflater.inflate(R.layout.beer_fragment, container, false)
@@ -84,6 +86,12 @@ class BeerFragment(
             if(result.resultCode == RESULT_OK && result.data != null){
                 val beerReport = result.data!!.getSerializableExtra("it.uninsubria.mybeer.report") as Report
                 sqLiteHandler.addReport(beerReport)
+            }
+        }
+
+        searchBreweryLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){result ->
+            if(result.resultCode == RESULT_OK){
+                Toast.makeText(requireContext(), "View brewery ok", Toast.LENGTH_LONG).show()
             }
         }
 
@@ -147,12 +155,17 @@ class BeerFragment(
                     .show()
                 sqLiteHandler.addFavBeer(selectedBeer, user)
             }
-
             R.id.beer_menu_create_report -> {
                 Toast.makeText(requireContext(), "Crea rapporto birra", Toast.LENGTH_LONG).show()
                 val intent = Intent(context, ReportBeerActivity::class.java)
                 intent.putExtra("selected_beer", selectedBeer)
                 reportBeerLauncher.launch(intent)
+            }
+            R.id.beer_see_brewery -> {
+                Toast.makeText(requireContext(), "Visualizzazione birreria", Toast.LENGTH_LONG).show()
+                val intent = Intent(context, SearchBreweriesActivity::class.java)
+                intent.putExtra("selected_beer", selectedBeer)
+                searchBreweryLauncher.launch(intent)
             }
         }
         return true

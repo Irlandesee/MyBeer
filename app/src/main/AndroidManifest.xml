@@ -15,6 +15,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyBeer"
         tools:targetApi="31">
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDubSX8JhjgeGW-SVSagFAtWvN9NaJpHec"/>
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="it.uninsubria.mybeer.fileprovider"
@@ -29,6 +32,8 @@
             android:name=".activities.ReportBeerActivity"
             android:exported="false"/>
         <activity android:name=".activities.ViewReportActivity"
+            android:exported="false"/>
+        <activity android:name=".activities.SearchBreweriesActivity"
             android:exported="false"/>
         <activity
             android:name=".MainActivity"

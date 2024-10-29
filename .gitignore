@@ -40,3 +40,6 @@ local.properties
 hs_err_pid*
 replay_pid*
 >>>>>>> 8802103d1796ceafdacb172a384b5e9af350136f
+
+secrets.properties
+google-services.json

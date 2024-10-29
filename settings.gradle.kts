@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "MyBeer"
 include(":app")
- 
+

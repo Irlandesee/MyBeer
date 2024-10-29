@@ -6,5 +6,8 @@
     <item
         android:id="@+id/beer_menu_create_report"
         android:title="@string/beer_create_report"/>
+    <item
+        android:id="@+id/beer_see_brewery"
+        android:title="@string/beer_brewery"/>
 
 </menu>

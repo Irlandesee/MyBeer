@@ -40,7 +40,6 @@ class ViewReportActivity : AppCompatActivity(){
 
         val ivReportBeerImage: ImageView = findViewById(R.id.iv_report_image)
         val imageUri = selectedReport.report_picture_link
-        //File not found Exception
         ivReportBeerImage.setImageBitmap(
             imageUri?.let{ File(it).readBytes().size }?.let{it -> BitmapFactory.decodeByteArray(imageUri.let{ File(it).readBytes()}, 0, it)}
         )
