@@ -24,7 +24,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var db: FirebaseDatabase
     private lateinit var floatingActionButton: FloatingActionButton
     private lateinit var sqLiteHandler: DatabaseHandler
-    private val placesApiKey: String = "AIzaSyDubSX8JhjgeGW-SVSagFAtWvN9NaJpHec"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,8 +33,6 @@ class MainActivity : AppCompatActivity() {
         db = FirebaseDatabase.getInstance(DATABASE_NAME)
         sqLiteHandler = DatabaseHandler(baseContext, db)
 
-        Places.initializeWithNewPlacesApiEnabled(applicationContext, placesApiKey)
-        val placesClient = Places.createClient(this)
 
         val vetrinaFragment = VetrinaFragment(db, sqLiteHandler)
         val beerFragment = BeerFragment(db, sqLiteHandler)
