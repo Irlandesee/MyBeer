@@ -15,7 +15,7 @@ glide = "4.16.0"
 places = "4.0.0"
 secretsGradle = "2.0.1"
 kotlinParcelize = "1.9.24"
-play-sercices-maps = "17.0.0"
+play-sercices-maps = "19.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -30,6 +30,7 @@ firebase-database = { group = "com.google.firebase", name = "firebase-database",
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 places = { module = "com.google.android.libraries.places:places", version.ref="places"}
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref="play-sercices-maps"}
+kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref="kotlin"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

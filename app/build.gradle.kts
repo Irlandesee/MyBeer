@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.glide)
     implementation(libs.places)
     implementation(libs.play.services.maps)
+    implementation(platform(libs.kotlin.bom))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -63,7 +64,6 @@ secrets {
     // To add your Maps API key to this project:
     // 1. If the secrets.properties file does not exist, create it in the same folder as the local.properties file.
     // 2. Add this line, where YOUR_API_KEY is your API key:
-    //val PLACES_API_KEY="AIzaSyDubSX8JhjgeGW-SVSagFAtWvN9NaJpHec"
     propertiesFileName = "secrets.properties"
 
     // A properties file containing default secret values. This file can be

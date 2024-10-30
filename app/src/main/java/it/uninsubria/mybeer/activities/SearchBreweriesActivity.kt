@@ -25,7 +25,7 @@ class SearchBreweriesActivity : AppCompatActivity(){
 
     private lateinit var editBeerBrewery: EditText
     private lateinit var selectedBeer: Beer
-    private val placesApiKey: String = BuildConfig.PLACES_API_KEY
+    private val mapsApiKey: String = BuildConfig.MAPS_API_KEY
     private lateinit var placesClient: PlacesClient
 
     override fun onCreate(savedInstanceState: Bundle?){
@@ -37,7 +37,7 @@ class SearchBreweriesActivity : AppCompatActivity(){
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        Places.initializeWithNewPlacesApiEnabled(applicationContext, placesApiKey)
+        Places.initializeWithNewPlacesApiEnabled(applicationContext, mapsApiKey)
         placesClient = Places.createClient(this)
 
         editBeerBrewery = findViewById(R.id.autoCompleteView)
@@ -47,7 +47,7 @@ class SearchBreweriesActivity : AppCompatActivity(){
             editBeerBrewery.setText(selectedBeer.beer_brewery)
         }
 
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map_fragment) as? SupportMapFragment
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
         mapFragment?.getMapAsync{ googleMap ->
             addMarkers(googleMap)
         }
@@ -66,14 +66,19 @@ class SearchBreweriesActivity : AppCompatActivity(){
             .setMaxResultCount(1).build()
         placesClient.searchByText(searchByTextRequest).addOnSuccessListener{response ->
             val places: List<Place> = response.places
-            Log.w(TAG, places.toString())
+            println(places)
+            places.forEach{ place ->
+                place.location?.let {
+                    MarkerOptions()
+                        .title(selectedBeer.beer_brewery)
+                        .position(it)
+                }?.let {
+                    googleMap.addMarker(
+                        it
+                    )
+                }
+            }
         }
-        /**
-        googleMap.addMarker(MarkerOptions()
-            .title(selectedBeer.beer_brewery)
-            .position()
-        )
-        **/
 
     }
 }

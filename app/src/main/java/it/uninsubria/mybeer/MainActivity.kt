@@ -8,15 +8,21 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.google.android.datatransport.runtime.BuildConfig
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.model.RectangularBounds
+import com.google.android.libraries.places.api.net.SearchByTextRequest
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.FirebaseDatabase
+import it.uninsubria.mybeer.BuildConfig.PLACES_API_KEY
 import it.uninsubria.mybeer.dbHandler.DatabaseHandler
 import it.uninsubria.mybeer.fragments.BeerFragment
 import it.uninsubria.mybeer.fragments.VetrinaFragment
-import java.io.InputStream
-import java.io.InputStreamReader
+import java.util.Arrays
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,6 +31,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var floatingActionButton: FloatingActionButton
     private lateinit var sqLiteHandler: DatabaseHandler
 
+    private val placesApiKey = PLACES_API_KEY
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -32,7 +41,16 @@ class MainActivity : AppCompatActivity() {
 
         db = FirebaseDatabase.getInstance(DATABASE_NAME)
         sqLiteHandler = DatabaseHandler(baseContext, db)
-
+        val available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
+        if (available == ConnectionResult.SUCCESS){
+            Log.d(TAG, "isServicesOk: Google Play Services is working")
+        }
+        else if(GoogleApiAvailability.getInstance().isUserResolvableError(available)){
+            Log.d(TAG, "Error occured, isResolvable: $available")
+        }else{
+            Log.d(TAG, "Cant make requests")
+            finish()
+        }
 
         val vetrinaFragment = VetrinaFragment(db, sqLiteHandler)
         val beerFragment = BeerFragment(db, sqLiteHandler)
