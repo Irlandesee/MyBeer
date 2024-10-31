@@ -1,11 +1,13 @@
 package it.uninsubria.mybeer
 
 import android.content.ContentValues.TAG
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.gms.common.ConnectionResult
@@ -18,6 +20,7 @@ import com.google.android.libraries.places.api.net.SearchByTextRequest
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.FirebaseDatabase
 import it.uninsubria.mybeer.BuildConfig.PLACES_API_KEY
+import it.uninsubria.mybeer.activities.SearchBreweriesActivity
 import it.uninsubria.mybeer.dbHandler.DatabaseHandler
 import it.uninsubria.mybeer.fragments.BeerFragment
 import it.uninsubria.mybeer.fragments.VetrinaFragment
@@ -30,9 +33,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var db: FirebaseDatabase
     private lateinit var floatingActionButton: FloatingActionButton
     private lateinit var sqLiteHandler: DatabaseHandler
-
-    private val placesApiKey = PLACES_API_KEY
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,10 +51,15 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "Cant make requests")
             finish()
         }
-
         val vetrinaFragment = VetrinaFragment(db, sqLiteHandler)
         val beerFragment = BeerFragment(db, sqLiteHandler)
         setCurrentFragment(vetrinaFragment)
+
+        val searchBreweriesLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){result ->
+            if(result.resultCode == RESULT_OK){
+                Toast.makeText(this, "Maps ok", Toast.LENGTH_LONG).show()
+            }
+        }
 
         floatingActionButton = findViewById<FloatingActionButton>(R.id.floating_button)
         val popupMenu = PopupMenu(baseContext, floatingActionButton)
@@ -73,8 +78,8 @@ class MainActivity : AppCompatActivity() {
                 }else if(menuItem.equals(menuItemVetrina)){//move to vetrina fragment
                     setCurrentFragment(vetrinaFragment)
                 }else if(menuItem.equals(menuItemMaps)){//move to fragment maps
-                    Toast.makeText(baseContext, "$menuItem.title", Toast.LENGTH_LONG).show()
-                    TODO("maps fragment")
+                    val intent = Intent(this, SearchBreweriesActivity::class.java)
+                    searchBreweriesLauncher.launch(intent)
                 }
                 true
             }
