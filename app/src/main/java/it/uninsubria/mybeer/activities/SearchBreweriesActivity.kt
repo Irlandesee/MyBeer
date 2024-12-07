@@ -1,17 +1,21 @@
 package it.uninsubria.mybeer.activities
 
+import android.Manifest
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
 import android.content.IntentSender
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.location.Location
+import android.nfc.Tag
 import android.os.Bundle
 import android.util.Log
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.OnRequestPermissionsResultCallback
@@ -21,12 +25,15 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.LocationSettingsResponse
 import com.google.android.gms.location.Priority
 import com.google.android.gms.location.SettingsClient
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
@@ -49,6 +56,7 @@ import it.uninsubria.mybeer.datamodel.Beer
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.Arrays
+import java.util.Locale
 
 class SearchBreweriesActivity : AppCompatActivity(),
     OnMapReadyCallback,
@@ -60,9 +68,17 @@ class SearchBreweriesActivity : AppCompatActivity(),
     private lateinit var placesClient: PlacesClient
 
     private var permissionDenied: Boolean = false
-    private lateinit var map: GoogleMap
+    private lateinit var googleMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var lastKnowLocation: Location
+
+    private val locationPermissionRequest = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()){ permissions ->
+        if(permissions.entries.all { it.value }) {
+            getLastLocation()
+        }
+        else{
+            Toast.makeText(this, "Location permission denied", Toast.LENGTH_LONG).show()
+        }
+    }
 
     //Defines a list of fields to include in the response fo each returned place
     private val placeFields: List<Place.Field> = listOf(Place.Field.ID, Place.Field.DISPLAY_NAME)
@@ -77,21 +93,26 @@ class SearchBreweriesActivity : AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
 
-        lifecycleScope.launch{
-            getCurrentLocation()
-        }
 
         enableEdgeToEdge()
+        //enableMyLocation()
         setContentView(R.layout.activity_search_breweries)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)){v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         Places.initializeWithNewPlacesApiEnabled(applicationContext, mapsApiKey)
         placesClient = Places.createClient(this)
+
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map_fragment) as? SupportMapFragment
+        mapFragment?.getMapAsync(this)
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        locationPermissionRequest.launch(arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION))
 
         editBeerBrewery = findViewById(R.id.autoCompleteView)
         val extras: Bundle? = intent.extras
@@ -99,8 +120,6 @@ class SearchBreweriesActivity : AppCompatActivity(),
             selectedBeer = extras.getSerializable("selected_beer") as Beer
             editBeerBrewery.setText(selectedBeer.beer_brewery)
         }
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
-        mapFragment?.getMapAsync(this)
 
 
         val floatingActionButton: FloatingActionButton = findViewById(R.id.floating_button)
@@ -116,76 +135,53 @@ class SearchBreweriesActivity : AppCompatActivity(),
         if(permissionDenied) Toast.makeText(this, "Location permission denied", Toast.LENGTH_LONG).show()
     }
 
-    override fun onMapReady(googleMap: GoogleMap) {
-        this.map = googleMap
-        enableMyLocation()
-        val radius: Double = 10000.0 //10 km
-        setSearchBounds(radius)
-        val searchNearbyRequest: SearchNearbyRequest = SearchNearbyRequest
-            .builder(bounds, placeFields)
-            .setIncludedTypes(includedTypes)
-            .setMaxResultCount(10).build()
-        placesClient.searchNearby(searchNearbyRequest)
-            .addOnSuccessListener { response ->
-                val places: List<Place> = response.places
-                Log.w(TAG, "Places: $places")
+    override fun onMapReady(map: GoogleMap) {
+        googleMap = map
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+            googleMap.isMyLocationEnabled = true
+            //getLastLocation()
+            selectedBeer.beer_brewery?.let {
+                Log.d(TAG, "Beer selected: $it")
+                addPlaceMarker(placeName= it)
             }
+        }
     }
 
-    private fun enableMyLocation(){
-        if(ContextCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED
-            || ContextCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED){
-            map.isMyLocationEnabled = true
+    private fun getLastLocation(){
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
             return
+        }
+        val locationTask: Task<Location> = fusedLocationClient.lastLocation
+        locationTask.addOnSuccessListener{ location: Location? ->
+            if(location != null){
+                val userLocation = LatLng(location.latitude, location.longitude)
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15f))
+                googleMap.addMarker(MarkerOptions().position(userLocation).title("You are here"))
+            }else{
+                Toast.makeText(this, "Location not available", Toast.LENGTH_LONG).show()
+            }
+        }.addOnFailureListener{ e -> Toast.makeText(this, "Failed to get location ${e.message}", Toast.LENGTH_LONG).show()}
+
+    }
+
+    private fun addPlaceMarker(placeName: String){
+        val geocoder = Geocoder(this, Locale.getDefault())
+        val addresses = geocoder.getFromLocationName(placeName, 1)
+
+        if(!addresses.isNullOrEmpty()){
+            val address = addresses[0]
+            val placeLocation = LatLng(address.latitude, address.longitude)
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(placeLocation, 15f))
+            googleMap.addMarker(MarkerOptions().position(placeLocation).title(placeName))
         }else{
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION),
-                LOCATION_PERMISSION_REQUEST_CODE)
+            Toast.makeText(this, "Place couldn't be found: $placeName", Toast.LENGTH_LONG).show()
+
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray){
-        if(requestCode != LOCATION_PERMISSION_REQUEST_CODE){
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-            return
-        }
-        if(isPermissionGranted(permissions, grantResults, ACCESS_FINE_LOCATION)
-            || isPermissionGranted(permissions, grantResults, ACCESS_COARSE_LOCATION)){
-            enableMyLocation()
-        }else{ permissionDenied = true }
-
-    }
-
-    private fun isPermissionGranted(grantPermissions: Array<String>, grantResults: IntArray, permission: String): Boolean{
-        for(i in grantPermissions.indices)
-            if(permission == grantPermissions[i])
-                return grantResults[i] == PackageManager.PERMISSION_GRANTED
-        return false
-    }
 
 
-    @SuppressLint("MissingPermission")
-    private suspend fun getCurrentLocation(){
-        val result = fusedLocationClient
-            .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, CancellationTokenSource().token)
-            .await()
-        result?.let{ fetchedLocation -> this.lastKnowLocation = fetchedLocation }
-        fusedLocationClient.lastLocation.addOnFailureListener{
-            Log.w(TAG, "Failed to retrieve current location")
-            //Toast.makeText(this, "Failed to retrive current location", Toast.LENGTH_LONG).show()
-        }
-    }
 
-    private fun setSearchBounds(radius: Double) {
-        val center: LatLng = LatLng(lastKnowLocation.latitude, lastKnowLocation.latitude)
-        bounds = CircularBounds.newInstance(center, radius)
-    }
-
-
-    private fun addMarkers(googleMap: GoogleMap){
-
-    }
 }
