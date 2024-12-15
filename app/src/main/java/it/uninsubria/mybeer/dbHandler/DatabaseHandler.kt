@@ -5,13 +5,16 @@ import android.content.ContentValues.TAG
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import it.uninsubria.mybeer.datamodel.Beer
 import it.uninsubria.mybeer.datamodel.Report
 import it.uninsubria.mybeer.datamodel.User
 import java.security.MessageDigest
+import java.time.LocalDate
 import kotlin.random.Random
 import kotlin.text.Charsets.UTF_8
 
@@ -55,7 +58,8 @@ class DatabaseHandler(context: Context,
                 "beer_style TEXT," +
                 "beer_brewery TEXT," +
                 "notes TEXT," +
-                "report_picture_link TEXT)")
+                "report_picture_link TEXT," +
+                "report_date TIMESTAMP)")
         initCategories(db)
         initUser(db)
     }
@@ -178,6 +182,7 @@ class DatabaseHandler(context: Context,
         TODO("Yet to implement")
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun getReports(): ArrayList<Report>{
         val result: ArrayList<Report> = ArrayList()
         val reportsCursor = readableDatabase.query(
@@ -197,7 +202,8 @@ class DatabaseHandler(context: Context,
                 reportsCursor.getString(2),//style
                 reportsCursor.getString(3),//brewery
                 reportsCursor.getString(4),//notes
-                reportsCursor.getString(5)// report picture link
+                reportsCursor.getString(5),// report picture link
+                LocalDate.parse(reportsCursor.getColumnName(6))
             ))
         }
         reportsCursor.close()

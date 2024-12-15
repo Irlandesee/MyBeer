@@ -9,6 +9,7 @@ import android.widget.PopupMenu
 import android.Manifest
 import android.content.ContentValues.TAG
 import android.content.Intent
+import android.os.Build
 import android.provider.MediaStore
 import android.provider.MediaStore.Audio.Media
 import android.util.Log
@@ -17,6 +18,7 @@ import android.widget.Spinner
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -33,6 +35,7 @@ import it.uninsubria.mybeer.datamodel.Report
 import it.uninsubria.mybeer.dbHandler.DatabaseHandler
 import java.io.File
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.util.Date
 import java.util.Locale
 
@@ -52,6 +55,7 @@ class ReportBeerActivity : AppCompatActivity() {
     private lateinit var selectedBeer: Beer
     private var reportId: String = ""
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -127,7 +131,8 @@ class ReportBeerActivity : AppCompatActivity() {
                                 spinnerBeerStyle.selectedItem.toString(),
                                 editBeerBrewery.text.toString(),
                                 editBeerNotes.text.toString(),
-                                photoFile.absolutePath
+                                photoFile.absolutePath,
+                                LocalDate.now()
                             )
                             Log.w(TAG, "RepActivity: $repResult.toString()")
                             val intent = Intent()

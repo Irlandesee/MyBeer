@@ -23,6 +23,7 @@ import it.uninsubria.mybeer.BuildConfig.PLACES_API_KEY
 import it.uninsubria.mybeer.activities.SearchBreweriesActivity
 import it.uninsubria.mybeer.dbHandler.DatabaseHandler
 import it.uninsubria.mybeer.fragments.BeerFragment
+import it.uninsubria.mybeer.fragments.ReportFragment
 import it.uninsubria.mybeer.fragments.VetrinaFragment
 import java.util.Arrays
 
@@ -53,20 +54,15 @@ class MainActivity : AppCompatActivity() {
         }
         val vetrinaFragment = VetrinaFragment(db, sqLiteHandler)
         val beerFragment = BeerFragment(db, sqLiteHandler)
+        val reportFragment = ReportFragment(db, sqLiteHandler)
         setCurrentFragment(vetrinaFragment)
-
-        val searchBreweriesLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){result ->
-            if(result.resultCode == RESULT_OK){
-                Toast.makeText(this, "Maps ok", Toast.LENGTH_LONG).show()
-            }
-        }
 
         floatingActionButton = findViewById<FloatingActionButton>(R.id.floating_button)
         val popupMenu = PopupMenu(baseContext, floatingActionButton)
         popupMenu.menuInflater.inflate(R.menu.popup_menu, popupMenu.menu)
         val menuItemCategory = popupMenu.menu.findItem(R.id.fam_item_search_cat)
         val menuItemVetrina = popupMenu.menu.findItem(R.id.fam_item_vetrina)
-        val menuItemMaps = popupMenu.menu.findItem(R.id.fam_item_maps)
+        val menuItemCreateReport = popupMenu.menu.findItem(R.id.beer_menu_create_report)
 
 
         floatingActionButton.setOnClickListener{
@@ -77,9 +73,8 @@ class MainActivity : AppCompatActivity() {
                     setCurrentFragment(beerFragment)
                 }else if(menuItem.equals(menuItemVetrina)){//move to vetrina fragment
                     setCurrentFragment(vetrinaFragment)
-                }else if(menuItem.equals(menuItemMaps)){//move to fragment maps
-                    val intent = Intent(this, SearchBreweriesActivity::class.java)
-                    searchBreweriesLauncher.launch(intent)
+                }else if(menuItem.equals(menuItemCreateReport)){
+                    setCurrentFragment(reportFragment)
                 }
                 true
             }

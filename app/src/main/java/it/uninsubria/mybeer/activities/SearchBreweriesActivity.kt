@@ -1,17 +1,10 @@
 package it.uninsubria.mybeer.activities
 
 import android.Manifest
-import android.Manifest.permission.ACCESS_COARSE_LOCATION
-import android.Manifest.permission.ACCESS_FINE_LOCATION
-import android.annotation.SuppressLint
-import android.content.ContentValues.TAG
-import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
-import android.nfc.Tag
 import android.os.Bundle
-import android.util.Log
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -19,43 +12,23 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.OnRequestPermissionsResultCallback
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.lifecycleScope
-import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.LocationSettingsRequest
-import com.google.android.gms.location.LocationSettingsResponse
-import com.google.android.gms.location.Priority
-import com.google.android.gms.location.SettingsClient
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.Task
 import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.model.CircularBounds
-import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.model.kotlin.circularBounds
 import com.google.android.libraries.places.api.net.PlacesClient
-import com.google.android.libraries.places.api.net.SearchByTextRequest
-import com.google.android.libraries.places.api.net.SearchNearbyRequest
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.squareup.okhttp.Dispatcher
 import it.uninsubria.mybeer.BuildConfig
 import it.uninsubria.mybeer.R
 import it.uninsubria.mybeer.datamodel.Beer
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import java.util.Arrays
 import java.util.Locale
 
 class SearchBreweriesActivity : AppCompatActivity(),
@@ -80,22 +53,10 @@ class SearchBreweriesActivity : AppCompatActivity(),
         }
     }
 
-    //Defines a list of fields to include in the response fo each returned place
-    private val placeFields: List<Place.Field> = listOf(Place.Field.ID, Place.Field.DISPLAY_NAME)
-    //Defines a list of types to include
-    private val includedTypes: List<String> = listOf("pub", "bar")
-    private lateinit var bounds: CircularBounds
-
-    companion object {
-        private const val LOCATION_PERMISSION_REQUEST_CODE = 1
-    }
-
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
 
-
         enableEdgeToEdge()
-        //enableMyLocation()
         setContentView(R.layout.activity_search_breweries)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)){v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -121,7 +82,6 @@ class SearchBreweriesActivity : AppCompatActivity(),
             editBeerBrewery.setText(selectedBeer.beer_brewery)
         }
 
-
         val floatingActionButton: FloatingActionButton = findViewById(R.id.floating_button)
         floatingActionButton.setOnClickListener{
             setResult(RESULT_OK)
@@ -140,11 +100,6 @@ class SearchBreweriesActivity : AppCompatActivity(),
         if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
             googleMap.isMyLocationEnabled = true
-            //getLastLocation()
-            selectedBeer.beer_brewery?.let {
-                Log.d(TAG, "Beer selected: $it")
-                addPlaceMarker(placeName= it)
-            }
         }
     }
 
@@ -157,12 +112,14 @@ class SearchBreweriesActivity : AppCompatActivity(),
         locationTask.addOnSuccessListener{ location: Location? ->
             if(location != null){
                 val userLocation = LatLng(location.latitude, location.longitude)
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15f))
-                googleMap.addMarker(MarkerOptions().position(userLocation).title("You are here"))
+                //googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15f))
+                //googleMap.addMarker(MarkerOptions().position(userLocation).title("You are here"))
+                selectedBeer.beer_brewery?.let { addPlaceMarker(it) }
             }else{
                 Toast.makeText(this, "Location not available", Toast.LENGTH_LONG).show()
             }
         }.addOnFailureListener{ e -> Toast.makeText(this, "Failed to get location ${e.message}", Toast.LENGTH_LONG).show()}
+
 
     }
 
@@ -177,11 +134,8 @@ class SearchBreweriesActivity : AppCompatActivity(),
             googleMap.addMarker(MarkerOptions().position(placeLocation).title(placeName))
         }else{
             Toast.makeText(this, "Place couldn't be found: $placeName", Toast.LENGTH_LONG).show()
-
         }
     }
-
-
 
 
 }

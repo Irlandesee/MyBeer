@@ -3,6 +3,7 @@ package it.uninsubria.mybeer.fragments
 import android.app.Activity.RESULT_OK
 import android.content.ContentValues.TAG
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -16,17 +17,18 @@ import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import it.uninsubria.mybeer.R
 import it.uninsubria.mybeer.activities.ReportBeerActivity
-import it.uninsubria.mybeer.activities.ViewReportActivity
 import it.uninsubria.mybeer.adapters.BeerListAdapter
 import it.uninsubria.mybeer.adapters.ReportListAdapter
 import it.uninsubria.mybeer.datamodel.Beer
@@ -54,8 +56,10 @@ class VetrinaFragment(
     private lateinit var user: User
     private lateinit var viewReportLauncher: ActivityResultLauncher<Intent>
     private lateinit var reportBeerLauncher: ActivityResultLauncher<Intent>
+    private lateinit var floatingActionButton: FloatingActionButton
 
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.vetrina_fragment, container, false)
         ViewCompat.setOnApplyWindowInsetsListener(view.findViewById(R.id.vetrina_fragment)) { v, insets ->
@@ -69,16 +73,11 @@ class VetrinaFragment(
         beers = sqLiteDatabase.getFavBeers(user)
         reports = sqLiteDatabase.getReports()
         beerListAdapter = BeerListAdapter(beers, beerClickListener)
-        reportListAdapter = ReportListAdapter(reports, reportClickListener)
 
 
         recyclerView = view.findViewById(R.id.recycler_vetrina)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = beerListAdapter
-
-        recyclerReportView = view.findViewById(R.id.recycler_vetrina_report)
-        recyclerReportView.layoutManager = LinearLayoutManager(context)
-        recyclerReportView.adapter = reportListAdapter
 
         autoCompleteView = view.findViewById(R.id.autoCompleteView)
         val adapter: ArrayAdapter<String> = ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1)
@@ -91,7 +90,9 @@ class VetrinaFragment(
                 parent, _, position, _ ->
             val item = parent.getItemAtPosition(position).toString()
             //Toast.makeText(requireContext(), "Item Clicked $item", Toast.LENGTH_LONG).show()
+            //TODO: filter beers
         }
+
         reportBeerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result ->
             if(result.resultCode != RESULT_OK && result.data != null){
                 val beerReport = result.data!!.getSerializableExtra("it.uninsubria.mybeer.report") as Report
@@ -110,6 +111,7 @@ class VetrinaFragment(
         return view
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onStart(){
         super.onStart()
         user = sqLiteDatabase.getUser()
@@ -118,7 +120,7 @@ class VetrinaFragment(
 
         //Log.w(TAG, newBeers.toString())
         beerListAdapter.submitList(newBeers)
-        reportListAdapter.submitList(newReports)
+        //reportListAdapter.submitList(newReports)
     }
 
     private fun createVetrinaPopupBeerMenu(cardView: CardView){
@@ -134,17 +136,6 @@ class VetrinaFragment(
             selectedBeer = beerListAdapter.getList()[index]!!
             createVetrinaPopupBeerMenu(cardView)
         }
-    }
-
-    private val reportClickListener = object: ReportClickListener{
-        override fun onLongClick(index: Int, cardView: CardView) {
-            selectedReport = reportListAdapter.getList()[index]
-            val intent = Intent(context, ViewReportActivity::class.java)
-            Log.w(TAG, "Vetrina fragment: $selectedReport")
-            intent.putExtra("it.uninsubria.mybeer.report", selectedReport)
-            viewReportLauncher.launch(intent)
-        }
-
     }
 
     override fun onMenuItemClick(item: MenuItem?): Boolean{
