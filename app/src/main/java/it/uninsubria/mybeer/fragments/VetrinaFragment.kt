@@ -79,19 +79,11 @@ class VetrinaFragment(
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = beerListAdapter
 
-        autoCompleteView = view.findViewById(R.id.autoCompleteView)
         val adapter: ArrayAdapter<String> = ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1)
         val favBeerCategories: ArrayList<String?> = ArrayList()
         beers.forEach{ b -> if (b != null) { favBeerCategories.add(b.beer_style) } }
 
         adapter.addAll(favBeerCategories.distinct())
-        autoCompleteView.setAdapter(adapter)
-        autoCompleteView.onItemClickListener = AdapterView.OnItemClickListener{
-                parent, _, position, _ ->
-            val item = parent.getItemAtPosition(position).toString()
-            //Toast.makeText(requireContext(), "Item Clicked $item", Toast.LENGTH_LONG).show()
-            //TODO: filter beers
-        }
 
         reportBeerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result ->
             if(result.resultCode != RESULT_OK && result.data != null){
