@@ -14,6 +14,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.PopupMenu
+import android.widget.Spinner
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -48,7 +49,7 @@ class VetrinaFragment(
     private lateinit var recyclerReportView: RecyclerView
     private var beers: ArrayList<Beer?> = ArrayList()
     private var reports: ArrayList<Report> = ArrayList()
-    private lateinit var autoCompleteView: AutoCompleteTextView
+    private lateinit var spinnerView: Spinner
     private lateinit var sqLiteDatabase: DatabaseHandler
     private lateinit var dbRef: DatabaseReference
     private lateinit var selectedBeer: Beer
@@ -58,6 +59,8 @@ class VetrinaFragment(
     private lateinit var reportBeerLauncher: ActivityResultLauncher<Intent>
     private lateinit var floatingActionButton: FloatingActionButton
 
+    private val defaultBeerStyle: String = "Seleziona una categoria"
+    private var selectedBeerStyle: String = ""
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -79,11 +82,42 @@ class VetrinaFragment(
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = beerListAdapter
 
+        recyclerReportView = view.findViewById(R.id.recycler_vetrina_report)
+        recyclerReportView.layoutManager = LinearLayoutManager(context)
+        recyclerReportView.adapter = reportListAdapter
+
+        spinnerView = view.findViewById(R.id.spinnerView)
         val adapter: ArrayAdapter<String> = ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1)
         val favBeerCategories: ArrayList<String?> = ArrayList()
         beers.forEach{ b -> if (b != null) { favBeerCategories.add(b.beer_style) } }
 
+        adapter.add(defaultBeerStyle)
         adapter.addAll(favBeerCategories.distinct())
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerView.adapter = adapter
+        spinnerView.setSelection(0)
+
+        spinnerView.onItemSelectedListener = object:
+            AdapterView.OnItemSelectedListener{
+                override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long){
+                    Toast.makeText(context, "${favBeerCategories[position]}", Toast.LENGTH_LONG).show()
+                    beers = sqLiteDatabase.getFavBeers(user)
+                    when(spinnerView.selectedItem){
+                        defaultBeerStyle -> {
+                            beerListAdapter.submitList(beers)
+                        }
+                        else -> {
+                            beerListAdapter.submitList(ArrayList(beers.filter{beer: Beer? -> beer!!.beer_style!!.equals(spinnerView.selectedItem) }))
+                        }
+                    }
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    return
+                }
+
+            }
 
         reportBeerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result ->
             if(result.resultCode != RESULT_OK && result.data != null){
