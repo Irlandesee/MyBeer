@@ -1,5 +1,6 @@
 package it.uninsubria.mybeer
 
+import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
 import android.content.Intent
 import android.os.Bundle
@@ -12,19 +13,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.model.RectangularBounds
-import com.google.android.libraries.places.api.net.SearchByTextRequest
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.database.FirebaseDatabase
-import it.uninsubria.mybeer.BuildConfig.PLACES_API_KEY
-import it.uninsubria.mybeer.activities.SearchBreweriesActivity
+import it.uninsubria.mybeer.activities.LoginActivity
 import it.uninsubria.mybeer.dbHandler.DatabaseHandler
 import it.uninsubria.mybeer.fragments.BeerFragment
 import it.uninsubria.mybeer.fragments.VetrinaFragment
-import java.util.Arrays
+import it.uninsubria.mybeer.fragments.ReportFragment
 
 
 class MainActivity : AppCompatActivity() {
@@ -34,6 +29,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var floatingActionButton: FloatingActionButton
     private lateinit var sqLiteHandler: DatabaseHandler
 
+    @SuppressLint("RestrictedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -53,20 +49,22 @@ class MainActivity : AppCompatActivity() {
         }
         val vetrinaFragment = VetrinaFragment(db, sqLiteHandler)
         val beerFragment = BeerFragment(db, sqLiteHandler)
+        val reportsFragment = ReportFragment(db, sqLiteHandler)
         setCurrentFragment(vetrinaFragment)
-
-        val searchBreweriesLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){result ->
-            if(result.resultCode == RESULT_OK){
-                Toast.makeText(this, "Maps ok", Toast.LENGTH_LONG).show()
-            }
-        }
 
         floatingActionButton = findViewById<FloatingActionButton>(R.id.floating_button)
         val popupMenu = PopupMenu(baseContext, floatingActionButton)
         popupMenu.menuInflater.inflate(R.menu.popup_menu, popupMenu.menu)
         val menuItemCategory = popupMenu.menu.findItem(R.id.fam_item_search_cat)
         val menuItemVetrina = popupMenu.menu.findItem(R.id.fam_item_vetrina)
-        val menuItemMaps = popupMenu.menu.findItem(R.id.fam_item_maps)
+        val menuItemReports = popupMenu.menu.findItem(R.id.fam_reports)
+        val menuItemLogin = popupMenu.menu.findItem(R.id.fam_login)
+
+        val loginActivityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result ->
+            if(result.resultCode == RESULT_OK){
+                Toast.makeText(baseContext, "Login ok", Toast.LENGTH_LONG).show()
+            }
+        }
 
 
         floatingActionButton.setOnClickListener{
@@ -77,9 +75,11 @@ class MainActivity : AppCompatActivity() {
                     setCurrentFragment(beerFragment)
                 }else if(menuItem.equals(menuItemVetrina)){//move to vetrina fragment
                     setCurrentFragment(vetrinaFragment)
-                }else if(menuItem.equals(menuItemMaps)){//move to fragment maps
-                    val intent = Intent(this, SearchBreweriesActivity::class.java)
-                    searchBreweriesLauncher.launch(intent)
+                }else if(menuItem.equals(menuItemReports)){
+                    setCurrentFragment(reportsFragment)
+                }else if(menuItem.equals(menuItemLogin)){
+                    val intent = Intent(baseContext, LoginActivity::class.java)
+                    loginActivityLauncher.launch(intent)
                 }
                 true
             }

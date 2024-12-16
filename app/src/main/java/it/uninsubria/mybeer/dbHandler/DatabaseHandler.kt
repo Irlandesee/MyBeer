@@ -1,5 +1,6 @@
 package it.uninsubria.mybeer.dbHandler
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.ContentValues.TAG
 import android.content.Context
@@ -12,6 +13,7 @@ import it.uninsubria.mybeer.datamodel.Beer
 import it.uninsubria.mybeer.datamodel.Report
 import it.uninsubria.mybeer.datamodel.User
 import java.security.MessageDigest
+import java.time.LocalDate
 import kotlin.random.Random
 import kotlin.text.Charsets.UTF_8
 
@@ -178,6 +180,7 @@ class DatabaseHandler(context: Context,
         TODO("Yet to implement")
     }
 
+    @SuppressLint("NewApi")
     fun getReports(): ArrayList<Report>{
         val result: ArrayList<Report> = ArrayList()
         val reportsCursor = readableDatabase.query(
@@ -197,7 +200,8 @@ class DatabaseHandler(context: Context,
                 reportsCursor.getString(2),//style
                 reportsCursor.getString(3),//brewery
                 reportsCursor.getString(4),//notes
-                reportsCursor.getString(5)// report picture link
+                reportsCursor.getString(5),// report picture link
+                LocalDate.parse(reportsCursor.getString(6))
             ))
         }
         reportsCursor.close()
@@ -252,6 +256,28 @@ class DatabaseHandler(context: Context,
         favBeerCursor.close()
 
         return User(id, password, name, surname, favBeers)
+    }
+
+    fun addUser(user: User){
+        val cursor = writableDatabase
+        val values = ContentValues().apply{
+            put("id", user.id)
+            put("password", user.password)
+            put("name", user.password)
+            put("surname", user.surname)
+            put("beer_id", "")
+        }
+        cursor.insert("user", null, values)
+        cursor.close()
+    }
+
+    fun checkCredentials(username: String, password: String): Boolean {
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM user WHERE id = ? AND password = ?", arrayOf(username, password))
+        // If cursor is not empty, credentials match
+        val isValidUser = cursor.count > 0
+        cursor.close()
+        return isValidUser
     }
 
     private fun initCategories(db: SQLiteDatabase){

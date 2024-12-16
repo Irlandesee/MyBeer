@@ -11,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
 import android.widget.PopupMenu
 import android.widget.Spinner
 import android.widget.Toast
@@ -70,18 +69,12 @@ class VetrinaFragment(
         user = sqLiteDatabase.getUser()
 
         beers = sqLiteDatabase.getFavBeers(user)
-        reports = sqLiteDatabase.getReports()
         beerListAdapter = BeerListAdapter(beers, beerClickListener)
-        reportListAdapter = ReportListAdapter(reports, reportClickListener)
 
 
         recyclerView = view.findViewById(R.id.recycler_vetrina)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = beerListAdapter
-
-        recyclerReportView = view.findViewById(R.id.recycler_vetrina_report)
-        recyclerReportView.layoutManager = LinearLayoutManager(context)
-        recyclerReportView.adapter = reportListAdapter
 
         spinnerView = view.findViewById(R.id.spinnerView)
         val adapter: ArrayAdapter<String> = ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1)
@@ -141,7 +134,6 @@ class VetrinaFragment(
 
         //Log.w(TAG, newBeers.toString())
         beerListAdapter.submitList(newBeers)
-        reportListAdapter.submitList(newReports)
     }
 
     private fun createVetrinaPopupBeerMenu(cardView: CardView){
@@ -157,17 +149,6 @@ class VetrinaFragment(
             selectedBeer = beerListAdapter.getList()[index]!!
             createVetrinaPopupBeerMenu(cardView)
         }
-    }
-
-    private val reportClickListener = object: ReportClickListener{
-        override fun onLongClick(index: Int, cardView: CardView) {
-            selectedReport = reportListAdapter.getList()[index]
-            val intent = Intent(context, ViewReportActivity::class.java)
-            Log.w(TAG, "Vetrina fragment: $selectedReport")
-            intent.putExtra("it.uninsubria.mybeer.report", selectedReport)
-            viewReportLauncher.launch(intent)
-        }
-
     }
 
     override fun onMenuItemClick(item: MenuItem?): Boolean{

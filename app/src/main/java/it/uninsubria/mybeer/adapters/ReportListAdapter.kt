@@ -11,8 +11,8 @@ import it.uninsubria.mybeer.R
 import it.uninsubria.mybeer.datamodel.Report
 import it.uninsubria.mybeer.listeners.ReportClickListener
 
-class ReportListAdapter (
-    private var reportList: ArrayList<Report>,
+class ReportListAdapter(
+    private var reportList: ArrayList<Report?>,
     private val listener: ReportClickListener
 ): RecyclerView.Adapter<ReportViewHolder>(){
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReportViewHolder{
@@ -22,16 +22,16 @@ class ReportListAdapter (
     override fun getItemCount(): Int = reportList.size
 
     override fun onBindViewHolder(holder: ReportViewHolder, position: Int){
-        holder.tvReport.text = reportList[position].beer_name
+        holder.tvReport.text = reportList[position]?.beer_name
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun submitList(reportList: ArrayList<Report>) {
+    fun submitList(reportList: ArrayList<Report?>) {
         this.reportList = reportList
         notifyDataSetChanged()
     }
 
-    fun getList(): ArrayList<Report> { return reportList }
+    fun getList(): ArrayList<Report?> { return reportList }
 
 }
 
