@@ -77,15 +77,23 @@ class VetrinaFragment(
         recyclerView.adapter = beerListAdapter
 
         spinnerView = view.findViewById(R.id.spinnerView)
-        val adapter: ArrayAdapter<String> = ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1)
         val favBeerCategories: ArrayList<String?> = ArrayList()
-        beers.forEach{ b -> if (b != null) { favBeerCategories.add(b.beer_style) } }
-
-        adapter.add(defaultBeerStyle)
-        adapter.addAll(favBeerCategories.distinct())
+        val adapter: ArrayAdapter<String> = ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1)
+        favBeerCategories.add(defaultBeerStyle)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerView.adapter = adapter
-        spinnerView.setSelection(0)
+        if(beers.size > 0){
+            beers.forEach{ b -> if (b != null) { favBeerCategories.add(b.beer_style) } }
+            adapter.addAll(favBeerCategories.distinct())
+            spinnerView.adapter = adapter
+            spinnerView.setSelection(0)
+        }
+        else{
+            //app crashes here -> index out of bounds
+            adapter.addAll(favBeerCategories)
+            spinnerView.adapter = adapter
+            spinnerView.setSelection(0)
+        }
+
 
         spinnerView.onItemSelectedListener = object:
             AdapterView.OnItemSelectedListener{

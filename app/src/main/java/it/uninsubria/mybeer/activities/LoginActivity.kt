@@ -63,9 +63,8 @@ class LoginActivity() : AppCompatActivity() {
         if (dbHandler.checkCredentials(username, password)) {
             // If credentials are valid, proceed to the next screen
             Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
-            // Navigate to the home screen or another part of your app
-            // val intent = Intent(this, HomeActivity::class.java)
-            // startActivity(intent)
+            val intent = Intent(this, BeerActivity::class.java)
+            startActivity(intent)
         } else {
             // Show error message
             Toast.makeText(this, "Invalid username or password", Toast.LENGTH_SHORT).show()

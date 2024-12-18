@@ -39,6 +39,7 @@
             android:exported="false"/>
         <activity android:name=".activities.LoginActivity" android:exported="false"/>
         <activity android:name=".activities.RegistrationActivity" android:exported="false"/>
+        <activity android:name=".activities.BeerActivity" android:exported="false"/>
         <activity
             android:name=".MainActivity"
             android:exported="true">

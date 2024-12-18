@@ -59,47 +59,8 @@ class DatabaseHandler(context: Context,
                 "notes TEXT," +
                 "report_picture_link TEXT)")
         initCategories(db)
-        initUser(db)
     }
 
-
-    private fun initUser(db: SQLiteDatabase){
-        var favBeerValues = ContentValues().apply{
-            put("beer_name_hex", "19feccc899d54d19cdca36e2d4244163")
-            put("beer_cat_hex", "00d926738d9f033e3ac77204a4c6e5a4")
-            put("beer_abv", "5.4% ABV")
-            put("beer_brewery", "Southern Grist Brewing Company")
-            put("beer_desc", "Brown ale brewed with lactose and vanilla beans ")
-            put("beer_ibu", "N/A IBU")
-            put("beer_name", "Bean There, Brown That")
-            put("beer_picture_link", "https://assets.untappd.com/site/beer_logos/beer-1424812_65b25_sm.jpeg")
-            put("beer_raters", "5,228 Ratings")
-            put("beer_style", "Brown Ale - American")
-        }
-        db.insert("fav_beer", null,favBeerValues)
-        favBeerValues = ContentValues().apply{
-            put("beer_name_hex", "1a4992db7d026560510b29a894e1cdfb")
-            put("beer_cat_hex", "00d926738d9f033e3ac77204a4c6e5a4")
-            put("beer_abv", "5.6% ABV")
-            put("beer_brewery", "South Gate Brewing Company")
-            put("beer_desc", "English style brown ale made with pecans, chocolate malts and British English East Kent Golding hops. Distinct brown sugar and pecan in the nose and on the palate, reminiscent of pecan pie. ")
-            put("beer_ibu", "N/A IBU")
-            put("beer_name", "Oaktown Pecan Brown")
-            put("beer_picture_link", "https://assets.untappd.com/site/assets/images/temp/badge-beer-default.png")
-            put("beer_raters", "1,865 Ratings")
-            put("beer_style", "Brown Ale - American")
-        }
-        db.insert("fav_beer", null, favBeerValues)
-        val userValues = ContentValues().apply{
-            put("id", "mattialun")
-            put("password", "pwd1234")
-            put("name", "mattia")
-            put("surname", "lunardi")
-            put("beer_id", "19feccc899d54d19cdca36e2d4244163")
-            put("beer_id", "1a4992db7d026560510b29a894e1cdfb")
-        }
-        db.insert("user", null, userValues)
-    }
 
 
     fun getFavBeers(user: User): ArrayList<Beer?>{

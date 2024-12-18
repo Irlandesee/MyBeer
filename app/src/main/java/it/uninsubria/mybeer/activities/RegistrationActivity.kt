@@ -47,8 +47,9 @@ class RegistrationActivity : AppCompatActivity() {
                     etPassword.text.toString().trim()
                 )
                 dbHandler.addUser(user)
-                Toast.makeText(baseContext, "User creation successful", Toast.LENGTH_LONG).show()
-
+                Toast.makeText(baseContext, "User creation successful, please login!", Toast.LENGTH_LONG).show()
+                val loginIntent = Intent(this, LoginActivity::class.java)
+                startActivity(loginIntent)
             }
         }
 
