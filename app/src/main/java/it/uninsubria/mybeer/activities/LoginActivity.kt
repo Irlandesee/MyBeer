@@ -63,11 +63,20 @@ class LoginActivity() : AppCompatActivity() {
         if (dbHandler.checkCredentials(username, password)) {
             // If credentials are valid, proceed to the next screen
             Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
-            val intent = Intent(this, BeerActivity::class.java)
-            startActivity(intent)
+            saveUserSession(username)
+            this.finish()
         } else {
             // Show error message
             Toast.makeText(this, "Invalid username or password", Toast.LENGTH_SHORT).show()
         }
     }
+
+    private fun saveUserSession(userName: String){
+        val preferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
+        val editor = preferences.edit()
+        editor.putString("username", userName)
+        editor.putLong("login_time", System.currentTimeMillis())
+        editor.apply()
+    }
+
 }

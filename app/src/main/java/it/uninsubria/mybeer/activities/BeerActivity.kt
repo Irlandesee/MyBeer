@@ -2,6 +2,7 @@ package it.uninsubria.mybeer.activities
 
 import android.content.ContentValues.TAG
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.widget.PopupMenu
@@ -28,6 +29,20 @@ class BeerActivity : AppCompatActivity(){
 
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
+
+        //Check if user is still logged in
+        val preferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
+        val userName = preferences.getString("username", null)
+        if(userName == null && !isSessionActive(preferences)){
+            val loginActivityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result ->
+                if(result.resultCode == RESULT_OK){
+                    Toast.makeText(baseContext, "Login ok", Toast.LENGTH_LONG).show()
+                }
+            }
+            val intent = Intent(this, LoginActivity::class.java)
+            loginActivityLauncher.launch(intent)
+        }
+
         enableEdgeToEdge()
         setContentView(R.layout.beer_activity)
         db = FirebaseDatabase.getInstance(DATABASE_NAME)
@@ -47,11 +62,6 @@ class BeerActivity : AppCompatActivity(){
         val reportsFragment = ReportFragment(db, sqLiteHandler)
         setCurrentFragment(vetrinaFragment)
 
-        val loginActivityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result ->
-            if(result.resultCode == RESULT_OK){
-                Toast.makeText(baseContext, "Login ok", Toast.LENGTH_LONG).show()
-            }
-        }
 
         floatingActionButton = findViewById<FloatingActionButton>(R.id.floating_button)
         val popupMenu = PopupMenu(baseContext, floatingActionButton)
@@ -70,14 +80,18 @@ class BeerActivity : AppCompatActivity(){
                     setCurrentFragment(vetrinaFragment)
                 }else if(menuItem.equals(menuItemReports)){
                     setCurrentFragment(reportsFragment)
-                }else if(menuItem.equals(menuItemLogin)){
-                    val intent = Intent(baseContext, LoginActivity::class.java)
-                    loginActivityLauncher.launch(intent)
                 }
                 true
             }
             popupMenu.show()
         }
+    }
+
+    private fun isSessionActive(preferences: SharedPreferences): Boolean{
+        val loginTime = preferences.getLong("login_time", -1)
+        //Defining session duration: 30 minutes
+        val sessionDuration = 30 * 60 * 1000
+        return (System.currentTimeMillis() - loginTime) <= sessionDuration
     }
 
     private fun setCurrentFragment(fragment: Fragment) = supportFragmentManager.beginTransaction().apply{

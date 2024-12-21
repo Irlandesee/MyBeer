@@ -23,4 +23,5 @@
     <string name="beer_raters">Ratings</string>
     <string name="beer_ibu">Ibu</string>
     <string name="see_reports">Vedi Reports</string>
+    <string name="default_beer_style">Scegli una categoria</string>
 </resources>
