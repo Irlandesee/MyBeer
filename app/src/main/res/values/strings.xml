@@ -27,4 +27,6 @@
     <string name="remove_report">Rimuovi report</string>
     <string name="beer_rate">Dai un voto</string>
     <string name="beer_see_ratings">Vedi voti</string>
+    <string name="photo_image">Foto birra</string>
+
 </resources>

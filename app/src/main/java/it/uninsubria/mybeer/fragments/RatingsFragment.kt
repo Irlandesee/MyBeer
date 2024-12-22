@@ -1,12 +1,22 @@
 package it.uninsubria.mybeer.fragments
+import android.Manifest
+import android.app.Activity.RESULT_OK
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.cardview.widget.CardView
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -20,6 +30,7 @@ import it.uninsubria.mybeer.datamodel.Rating
 import it.uninsubria.mybeer.datamodel.User
 import it.uninsubria.mybeer.dbHandler.DatabaseHandler
 import it.uninsubria.mybeer.listeners.BeerClickListener
+import java.io.File
 
 class RatingsFragment(
     private val db: FirebaseDatabase,
@@ -32,8 +43,9 @@ class RatingsFragment(
     private lateinit var dbRef: DatabaseReference
     private lateinit var user: User
     private lateinit var selectedRating: Rating
-
+    private lateinit var photoFile: File
     private var ratings : ArrayList<Rating> = ArrayList()
+    private lateinit var takePictureLauncher: ActivityResultContracts.TakePicture
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,6 +63,7 @@ class RatingsFragment(
 
         ratingsAdapter = RatingsAdapter(requireContext(), ratings, ratingClickListener)
         recyclerView.adapter = ratingsAdapter
+
 
         return view
     }
@@ -95,6 +108,12 @@ class RatingsFragment(
         }
     }
 
+    /**
+    private fun createImageFile(): File {
+        val imageFileName = "PNG_" + ratingId + "_"
+        return File.createTempFile(imageFileName, ".png", filesDir)
+    }**/
+
     override fun onMenuItemClick(item: MenuItem?): Boolean{
         when(item?.itemId){
             R.id.fam_remove_rating -> {
@@ -104,6 +123,14 @@ class RatingsFragment(
             }
             R.id.fam_take_photo -> {
                 Toast.makeText(requireContext(), "Foto alla birra", Toast.LENGTH_LONG).show()
+                if(ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.CAMERA), 1)
+                }else{
+                    val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                    val photoUri = FileProvider.getUriForFile(requireContext(), "it.uninsubria.mybeer.fileprovider", photoFile)
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+                    takePictureLauncher.launch(intent)
+                }
 
             }
         }

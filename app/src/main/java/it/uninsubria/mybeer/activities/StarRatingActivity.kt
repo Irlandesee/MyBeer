@@ -22,6 +22,7 @@ import it.uninsubria.mybeer.R
 import it.uninsubria.mybeer.datamodel.Beer
 import it.uninsubria.mybeer.datamodel.Rating
 import it.uninsubria.mybeer.dbHandler.DatabaseHandler
+import java.io.File
 import java.security.MessageDigest
 import java.util.Calendar
 import kotlin.text.Charsets.UTF_8
@@ -40,6 +41,9 @@ class StarRatingActivity() : AppCompatActivity(){
     private var selectedDate: String  = ""
     private lateinit var etDrinkingLocation: EditText
     private var beer: Beer? = null
+    private lateinit var ivPicture: ImageView
+    private lateinit var photoFile: File
+    private val TAKE_PICTURE_REQUEST_CODE  = 1001
 
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
