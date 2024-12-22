@@ -47,9 +47,10 @@ class RegistrationActivity : AppCompatActivity() {
                     etPassword.text.toString().trim()
                 )
                 dbHandler.addUser(user)
-                Toast.makeText(baseContext, "User creation successful, please login!", Toast.LENGTH_LONG).show()
+                Toast.makeText(baseContext, "User creato con successo, per favore procedi con il login!", Toast.LENGTH_LONG).show()
                 val loginIntent = Intent(this, LoginActivity::class.java)
                 startActivity(loginIntent)
+                this.finish()
             }
         }
 
@@ -71,33 +72,33 @@ class RegistrationActivity : AppCompatActivity() {
 
         // Validate username (not empty and minimum length)
         if (username.isEmpty() || username.length < 3) {
-            etUsername.error = "Username must be at least 3 characters"
+            etUsername.error = "Username deve essere lungo almeno 3 caratteri"
             isValid = false
         }
 
         // Validate name (not empty)
         if (name.isEmpty()) {
-            etName.error = "Name cannot be empty"
+            etName.error = "Il nome non può essere vuoto"
             isValid = false
         }
 
         // Validate surname (not empty)
         if (surname.isEmpty()) {
-            etSurname.error = "Surname cannot be empty"
+            etSurname.error = "Il cognome non può essere vuoto"
             isValid = false
         }
         // Validate email (email format)
         if (!isValidEmail(email)) {
-            etEmail.error = "Invalid email format"
+            etEmail.error = "Email non valida"
             isValid = false
         }
 
         // Validate password (minimum length and complexity)
         if (password.isEmpty() || password.length < 6) {
-            etPassword.error = "Password must be at least 6 characters"
+            etPassword.error = "La Password deve essere almeno lunga 6 caratteri"
             isValid = false
         } else if (!isValidPassword(password)) {
-            etPassword.error = "Password must contain at least one digit and one uppercase letter"
+            etPassword.error = "La password deve contenere almeno un carattere minuscolo e uno maiuscolo"
             isValid = false
         }
 

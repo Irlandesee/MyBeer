@@ -22,10 +22,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.database.FirebaseDatabase
 import it.uninsubria.mybeer.R
-import it.uninsubria.mybeer.activities.ReportBeerActivity
+import it.uninsubria.mybeer.activities.StarRatingActivity
 import it.uninsubria.mybeer.adapters.BeerListAdapter
 import it.uninsubria.mybeer.datamodel.Beer
-import it.uninsubria.mybeer.datamodel.Report
+import it.uninsubria.mybeer.datamodel.Rating
 import it.uninsubria.mybeer.dbHandler.DatabaseHandler
 import it.uninsubria.mybeer.listeners.BeerClickListener
 import it.uninsubria.mybeer.datamodel.User
@@ -42,7 +42,7 @@ class VetrinaFragment(
     private lateinit var selectedBeer: Beer
     private lateinit var user: User
     private lateinit var viewReportLauncher: ActivityResultLauncher<Intent>
-    private lateinit var reportBeerLauncher: ActivityResultLauncher<Intent>
+    private lateinit var starRatingLauncher: ActivityResultLauncher<Intent>
 
     private val defaultBeerStyle: String = "Seleziona una categoria"
 
@@ -82,25 +82,17 @@ class VetrinaFragment(
         }
 
 
-        reportBeerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result ->
-            if(result.resultCode != RESULT_OK && result.data != null){
-                val beerReport = result.data!!.getSerializableExtra("it.uninsubria.mybeer.report") as Report
-                sqLiteDatabase.addReport(beerReport)
+        starRatingLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result ->
+            if(result.resultCode == RESULT_OK && result.data != null){
+                Toast.makeText(context, "Rating aggiunto", Toast.LENGTH_LONG).show()
+                val rating = result.data!!.getSerializableExtra("it.uninsubria.mybeer.rating") as Rating
+                sqLiteDatabase.addRating(selectedBeer, rating)
             }
-
-        }
-
-        viewReportLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
-            result ->
-            if(result.resultCode == RESULT_OK)
-                Toast.makeText(context, "ViewReportOk", Toast.LENGTH_LONG).show()
-            else Toast.makeText(context, "ViewReportKo", Toast.LENGTH_LONG).show()
         }
 
         return view
     }
 
-    // is view null?
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         spinnerView.onItemSelectedListener = object:
@@ -158,11 +150,11 @@ class VetrinaFragment(
                 sqLiteDatabase.rmFavBeer(selectedBeer, user)
                 beerListAdapter.submitList(sqLiteDatabase.getFavBeers(user))
             }
-            R.id.beer_menu_create_report-> {
-                Toast.makeText(requireContext(), "Creating report", Toast.LENGTH_LONG).show()
-                val intent = Intent(context, ReportBeerActivity::class.java)
+            R.id.beer_menu_add_rating ->{
+                Toast.makeText(requireContext(), "Aggiunta rating", Toast.LENGTH_LONG).show()
+                val intent = Intent(context, StarRatingActivity::class.java)
                 intent.putExtra("selected_beer", selectedBeer)
-                reportBeerLauncher.launch(intent)
+                starRatingLauncher.launch(intent)
             }
 
         }

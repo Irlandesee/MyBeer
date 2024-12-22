@@ -41,7 +41,7 @@ class BeerListAdapter(
     fun submitList(beerList: ArrayList<Beer?>){
         this.beerList.clear()
         this.beerList = beerList
-        Log.w(TAG, beerList.toString())
+        //Log.w(TAG, beerList.toString())
         notifyDataSetChanged()
     }
 

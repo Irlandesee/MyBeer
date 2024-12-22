@@ -10,7 +10,7 @@ import android.util.Log
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import it.uninsubria.mybeer.datamodel.Beer
-import it.uninsubria.mybeer.datamodel.Report
+import it.uninsubria.mybeer.datamodel.Rating
 import it.uninsubria.mybeer.datamodel.User
 import java.security.MessageDigest
 import java.time.LocalDate
@@ -51,13 +51,21 @@ class DatabaseHandler(context: Context,
                 "surname VARCHAR(50), " +
                 "beer_id TEXT," +
                 "FOREIGN KEY(beer_id) references fav_beer(beer_bane_hex))")
-        db.execSQL("CREATE TABLE reports(" +
-                "report_id varchar(32) primary key," +
-                "beer_name TEXT," +
-                "beer_style TEXT," +
-                "beer_brewery TEXT," +
-                "notes TEXT," +
-                "report_picture_link TEXT)")
+        db.execSQL("CREATE TABLE ratings(" +
+                "rating_id VARCHAR(32) primary key," + //0
+                "rating INTEGER," + //1
+                "drunk_date TEXT," + //2
+                "drinking_location TEXT," + //3
+                "beer_name_hex TEXT," + //4
+                "beer_cat_hex TEXT," + //5
+                "beer_abv TEXT," + //6
+                "beer_brewery TEXT," + //7
+                "beer_desc TEXT," + //8
+                "beer_ibu TEXT," + //9
+                "beer_name TEXT," + //10
+                "beer_picture_link TEXT," + //11
+                "beer_raters TEXT," + //12
+                "beer_style TEXT)") //13
         initCategories(db)
     }
 
@@ -66,7 +74,6 @@ class DatabaseHandler(context: Context,
     fun getFavBeers(user: User): ArrayList<Beer?>{
         val result: ArrayList<Beer?> = ArrayList()
         val favBeers = user.favBeers
-        //println(favBeers)
         favBeers.forEach{
             (name, cat) ->
             val selection = "beer_name_hex = ?"
@@ -123,51 +130,6 @@ class DatabaseHandler(context: Context,
     private fun hashString(str: String): ByteArray = MessageDigest.getInstance("MD5").digest(str.toByteArray(UTF_8))
     private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
 
-    fun addReport(report: Report){
-        val reportValues = ContentValues().apply {
-            put("report_id", report.report_id)
-            put("beer_name", report.beer_name)
-            put("beer_style", report.beer_style)
-            put("beer_brewery", report.beer_brewery)
-            put("notes", report.notes)
-            put("report_picture_link", report.report_picture_link)
-        }
-        Log.w(TAG, "addReport: Report[$reportValues]")
-        writableDatabase.insert("reports", null, reportValues)
-
-    }
-
-    fun rmReport(reportId: String){
-        TODO("Yet to implement")
-    }
-
-    @SuppressLint("NewApi")
-    fun getReports(): ArrayList<Report>{
-        val result: ArrayList<Report> = ArrayList()
-        val reportsCursor = readableDatabase.query(
-            "reports",
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        )
-        while(reportsCursor.moveToNext()){
-            result.add(Report(
-                reportsCursor.getString(0),//id
-                reportsCursor.getString(1),//name
-                reportsCursor.getString(2),//style
-                reportsCursor.getString(3),//brewery
-                reportsCursor.getString(4),//notes
-                reportsCursor.getString(5),// report picture link
-                LocalDate.parse(reportsCursor.getString(6))
-            ))
-        }
-        reportsCursor.close()
-        return result
-    }
 
     fun rmFavBeer(beer: Beer, user: User){
         writableDatabase.delete(
@@ -178,9 +140,9 @@ class DatabaseHandler(context: Context,
 
         val rmFavBeerFromUser = "update user set beer_id = replace(beer_id, ?, '') where id = ?"
         val arr = arrayOf("$beer.beer_name_hex", "$user.id")
-        val rmQueryCursor = writableDatabase.rawQuery(rmFavBeerFromUser, arr)
-        rmQueryCursor.moveToNext()
-        rmQueryCursor.close()
+        writableDatabase.execSQL(rmFavBeerFromUser, arr)
+        val removeRatingsQuery = "DELETE FROM ratings WHERE beer_name_hex = ?"
+        writableDatabase.execSQL(removeRatingsQuery, arrayOf(beer.beer_name_hex))
     }
 
     fun getUser(): User {
@@ -231,6 +193,77 @@ class DatabaseHandler(context: Context,
         cursor.insert("user", null, values)
         cursor.close()
     }
+
+    fun addRating(beer: Beer, rating: Rating){
+        val cursor = writableDatabase
+        val values = ContentValues().apply{
+            put("rating_id", beer.beer_name?.let { hashString(it).toHex() })
+            put("rating", rating.rating)
+            put("drunk_date", rating.drunkDate)
+            put("drinking_location", rating.drunkLocation)
+            put("beer_name_hex", beer.beer_name_hex)
+            put("beer_cat_hex", beer.beer_cat_hex)
+            put("beer_abv", beer.beer_abv)
+            put("beer_brewery", beer.beer_brewery)
+            put("beer_desc", beer.beer_desc)
+            put("beer_ibu", beer.beer_ibu)
+            put("beer_name", beer.beer_name)
+            put("beer_picture_link", beer.beer_picture_link)
+            put("beer_raters", beer.beer_raters)
+            put("beer_style", beer.beer_style)
+        }
+        cursor.insert("ratings", null, values)
+        cursor.close()
+    }
+
+    fun removeRating(rating: Rating){
+        val deleteQuery = "delete from ratings where rating_id = ?"
+        writableDatabase.execSQL(deleteQuery, arrayOf(rating.ratingId))
+    }
+
+
+    fun getRatings(): ArrayList<Rating> {
+        val ratingsCursor = readableDatabase.query(
+            "ratings",
+            null,
+            null,
+            null,
+            null,
+            null,
+            "rating_id ASC"
+        )
+        val ratings: ArrayList<Rating> = ArrayList()
+        while(ratingsCursor.moveToNext()){
+            val beer = Beer(
+                ratingsCursor.getString(10),
+                ratingsCursor.getString(13),
+                ratingsCursor.getString(7),
+                ratingsCursor.getString(6),
+                ratingsCursor.getString(9),
+                ratingsCursor.getString(12),
+                ratingsCursor.getString(8),
+                ratingsCursor.getString(11),
+                ratingsCursor.getString(5),
+                ratingsCursor.getString(4)
+            )
+            ratings.add(Rating(beer,
+                ratingsCursor.getString(0),
+                ratingsCursor.getInt(1),
+                ratingsCursor.getString(2),
+                ratingsCursor.getString(3),
+                ))
+        }
+        return ratings
+    }
+
+    fun getRating(beer: Beer): Int{
+        val db = readableDatabase
+        val cursor = db.rawQuery("select * from ratings where beer_id = ?", arrayOf(beer.beer_name_hex))
+        val rating = cursor.getInt(2)
+        cursor.close()
+        return rating
+    }
+
 
     fun checkCredentials(username: String, password: String): Boolean {
         val db = readableDatabase

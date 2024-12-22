@@ -32,11 +32,9 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import it.uninsubria.mybeer.R
-import it.uninsubria.mybeer.activities.ReportBeerActivity
 import it.uninsubria.mybeer.activities.SearchBreweriesActivity
 import it.uninsubria.mybeer.adapters.BeerListAdapter
 import it.uninsubria.mybeer.datamodel.Beer
-import it.uninsubria.mybeer.datamodel.Report
 import it.uninsubria.mybeer.datamodel.User
 import it.uninsubria.mybeer.dbHandler.DatabaseHandler
 import it.uninsubria.mybeer.listeners.BeerClickListener
@@ -60,7 +58,6 @@ class BeerFragment(
     private var beerCategories: HashMap<String, String> = HashMap<String, String>()
     private lateinit var user: User
 
-    private lateinit var reportBeerLauncher: ActivityResultLauncher<Intent>
     private lateinit var searchBreweryLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?{
@@ -79,14 +76,6 @@ class BeerFragment(
         recyclerView.layoutManager = LinearLayoutManager(context)
         beerListAdapter = BeerListAdapter(beers, beerClickListener)
         recyclerView.adapter = beerListAdapter
-
-        reportBeerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){result ->
-            //save report
-            if(result.resultCode == RESULT_OK && result.data != null){
-                val beerReport = result.data!!.getSerializableExtra("it.uninsubria.mybeer.report") as Report
-                sqLiteHandler.addReport(beerReport)
-            }
-        }
 
         searchBreweryLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){result ->
             if(result.resultCode == RESULT_OK){
@@ -153,12 +142,6 @@ class BeerFragment(
                 Toast.makeText(requireContext(), "Birra aggiunta alle preferite", Toast.LENGTH_LONG)
                     .show()
                 sqLiteHandler.addFavBeer(selectedBeer, user)
-            }
-            R.id.beer_menu_create_report -> {
-                Toast.makeText(requireContext(), "Crea rapporto birra", Toast.LENGTH_LONG).show()
-                val intent = Intent(context, ReportBeerActivity::class.java)
-                intent.putExtra("selected_beer", selectedBeer)
-                reportBeerLauncher.launch(intent)
             }
             R.id.beer_see_brewery -> {
                 Toast.makeText(requireContext(), "Visualizzazione birreria", Toast.LENGTH_LONG).show()

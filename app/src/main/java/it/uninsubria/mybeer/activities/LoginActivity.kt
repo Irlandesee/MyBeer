@@ -40,6 +40,7 @@ class LoginActivity() : AppCompatActivity() {
         tvRegisterRedirect.setOnClickListener {
             val intent = Intent(this, RegistrationActivity::class.java)
             startActivity(intent)
+            this.finish()
         }
     }
 
@@ -50,11 +51,11 @@ class LoginActivity() : AppCompatActivity() {
         // Validate that fields are not empty
         when {
             username.isEmpty() -> {
-                etUsername.error = "Username cannot be empty"
+                etUsername.error = "Username non può essere vuoto"
                 return
             }
             password.isEmpty() -> {
-                etPassword.error = "Password cannot be empty"
+                etPassword.error = "Password non può essere vuoto"
                 return
             }
         }
@@ -62,12 +63,12 @@ class LoginActivity() : AppCompatActivity() {
         // Check credentials in the database
         if (dbHandler.checkCredentials(username, password)) {
             // If credentials are valid, proceed to the next screen
-            Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Successo!", Toast.LENGTH_SHORT).show()
             saveUserSession(username)
             this.finish()
         } else {
             // Show error message
-            Toast.makeText(this, "Invalid username or password", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "username o password invalido!", Toast.LENGTH_SHORT).show()
         }
     }
 

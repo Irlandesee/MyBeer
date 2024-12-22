@@ -18,7 +18,7 @@ import com.google.firebase.database.FirebaseDatabase
 import it.uninsubria.mybeer.R
 import it.uninsubria.mybeer.dbHandler.DatabaseHandler
 import it.uninsubria.mybeer.fragments.BeerFragment
-import it.uninsubria.mybeer.fragments.ReportFragment
+import it.uninsubria.mybeer.fragments.RatingsFragment
 import it.uninsubria.mybeer.fragments.VetrinaFragment
 
 class BeerActivity : AppCompatActivity(){
@@ -59,7 +59,7 @@ class BeerActivity : AppCompatActivity(){
         }
         val vetrinaFragment = VetrinaFragment(db, sqLiteHandler)
         val beerFragment = BeerFragment(db, sqLiteHandler)
-        val reportsFragment = ReportFragment(db, sqLiteHandler)
+        val ratingsFragment = RatingsFragment(db, sqLiteHandler)
         setCurrentFragment(vetrinaFragment)
 
 
@@ -68,18 +68,16 @@ class BeerActivity : AppCompatActivity(){
         popupMenu.menuInflater.inflate(R.menu.popup_menu, popupMenu.menu)
         val menuItemCategory = popupMenu.menu.findItem(R.id.fam_item_search_cat)
         val menuItemVetrina = popupMenu.menu.findItem(R.id.fam_item_vetrina)
-        val menuItemReports = popupMenu.menu.findItem(R.id.fam_reports)
-        val menuItemLogin = popupMenu.menu.findItem(R.id.fam_login)
+        val menuItemRatingFragment = popupMenu.menu.findItem(R.id.fam_beer_rate)
         floatingActionButton.setOnClickListener{
             popupMenu.setOnMenuItemClickListener {
                     menuItem ->
-                // Ricerca per categoria
                 if(menuItem.equals(menuItemCategory)){
                     setCurrentFragment(beerFragment)
-                }else if(menuItem.equals(menuItemVetrina)){//move to vetrina fragment
+                }else if(menuItem.equals(menuItemVetrina)){
                     setCurrentFragment(vetrinaFragment)
-                }else if(menuItem.equals(menuItemReports)){
-                    setCurrentFragment(reportsFragment)
+                }else if(menuItem.equals(menuItemRatingFragment)){
+                    setCurrentFragment(ratingsFragment)
                 }
                 true
             }
