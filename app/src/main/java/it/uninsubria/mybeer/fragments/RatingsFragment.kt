@@ -4,15 +4,20 @@ import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -45,7 +50,9 @@ class RatingsFragment(
     private lateinit var selectedRating: Rating
     private lateinit var photoFile: File
     private var ratings : ArrayList<Rating> = ArrayList()
-    private lateinit var takePictureLauncher: ActivityResultContracts.TakePicture
+    private lateinit var takePictureLauncher: ActivityResultLauncher<Intent>
+    private lateinit var cameraPermissionLauncher: ActivityResultLauncher<String>
+    private lateinit var ivPicture: ImageView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -108,11 +115,6 @@ class RatingsFragment(
         }
     }
 
-    /**
-    private fun createImageFile(): File {
-        val imageFileName = "PNG_" + ratingId + "_"
-        return File.createTempFile(imageFileName, ".png", filesDir)
-    }**/
 
     override fun onMenuItemClick(item: MenuItem?): Boolean{
         when(item?.itemId){
@@ -121,20 +123,10 @@ class RatingsFragment(
                 dbHandler.removeRating(selectedRating)
                 ratingsAdapter.submitList(dbHandler.getRatings())
             }
-            R.id.fam_take_photo -> {
-                Toast.makeText(requireContext(), "Foto alla birra", Toast.LENGTH_LONG).show()
-                if(ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
-                    ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.CAMERA), 1)
-                }else{
-                    val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                    val photoUri = FileProvider.getUriForFile(requireContext(), "it.uninsubria.mybeer.fileprovider", photoFile)
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-                    takePictureLauncher.launch(intent)
-                }
-
-            }
         }
         return true
     }
+
+
 
 }

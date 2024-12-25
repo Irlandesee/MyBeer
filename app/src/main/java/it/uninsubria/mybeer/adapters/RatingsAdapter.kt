@@ -2,6 +2,7 @@ package it.uninsubria.mybeer.adapters
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -51,6 +52,8 @@ class RatingsAdapter(private val context: Context,
                 .applyDefaultRequestOptions(requestOptions)
                 .load(rating.beer?.beer_picture_link)
                 .into(ivBeerPicture)
+            ivBeerPicture.setOnClickListener{ toggleBeerPicture(rating) }
+            ivBeerPicture.tag = "default"
         }
 
         private fun setStarRating(rating: Int) {
@@ -59,6 +62,20 @@ class RatingsAdapter(private val context: Context,
                     if (index < rating) R.drawable.ic_star // Filled star
                     else R.drawable.ic_star_border // Empty star
                 )
+            }
+
+        }
+
+        private fun toggleBeerPicture(rating: Rating){
+            if(ivBeerPicture.tag == "default"){
+                Glide.with(context)
+                    .load(rating.beer?.beer_picture_link)
+                    .into(ivBeerPicture)
+                ivBeerPicture.tag = "user"
+            }else{
+                val bitmap = BitmapFactory.decodeFile(rating.photoUri)
+                ivBeerPicture.setImageBitmap(bitmap)
+                ivBeerPicture.tag = "default"
             }
 
         }

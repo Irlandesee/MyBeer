@@ -1,8 +1,15 @@
 package it.uninsubria.mybeer.activities
 
+import android.Manifest
 import android.app.DatePickerDialog
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.MenuItem
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -10,8 +17,13 @@ import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
@@ -43,7 +55,8 @@ class StarRatingActivity() : AppCompatActivity(){
     private var beer: Beer? = null
     private lateinit var ivPicture: ImageView
     private lateinit var photoFile: File
-    private val TAKE_PICTURE_REQUEST_CODE  = 1001
+    private lateinit var takePictureLauncher: ActivityResultLauncher<Intent>
+    private lateinit var btnTakePhoto: Button
 
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
@@ -65,11 +78,19 @@ class StarRatingActivity() : AppCompatActivity(){
             beer = extras.getSerializable("selected_beer") as Beer
         }
 
+        photoFile = createImageFile()
+        takePictureLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ){ result ->
+            if(result.resultCode  == RESULT_OK){
+                ivPicture.setImageBitmap(BitmapFactory.decodeFile(photoFile.absolutePath))
+
+            }
+        }
         val fab: FloatingActionButton = findViewById(R.id.floating_button)
         fab.setOnClickListener{
             setResult(RESULT_OK)
             finish()
-
         }
 
         loadBeerDetails(beer)
@@ -94,11 +115,39 @@ class StarRatingActivity() : AppCompatActivity(){
         btnDrunkDate = findViewById(R.id.btn_drunk_date)
         etDrinkingLocation = findViewById(R.id.et_drinking_location)
         tvSelectedDate = findViewById(R.id.tv_drunk_date)
+        ivPicture = findViewById(R.id.iv_picture)
 
         // Initialize submit button
         val btnSubmit = findViewById<Button>(R.id.btn_submit_rating)
         btnSubmit.setOnClickListener { submitRating() }
+
+        btnTakePhoto = findViewById<Button>(R.id.btn_take_photo)
+        btnTakePhoto.setOnClickListener{
+            if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 1)
+            }else{
+                val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                val photoUri = FileProvider.getUriForFile(this, "it.uninsubria.mybeer.fileprovider", photoFile)
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+                try{
+                    takePictureLauncher.launch(intent)
+                }catch(e: Exception){
+                    Toast.makeText(this, "Errore nell'apertura della fotocamera: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+
+            }
+
+        }
     }
+
+    private fun setupLaunchers(){
+    }
+
+    private fun createImageFile(): File{
+        val imageFileName = "JPEG_${System.currentTimeMillis()}_"
+        return File.createTempFile(imageFileName, ".jpg", getExternalFilesDir(null))
+    }
+
 
     private fun initStars() {
         starViews = listOf(
@@ -163,7 +212,7 @@ class StarRatingActivity() : AppCompatActivity(){
         val drunkDate = selectedDate
         val drinkingLocation = etDrinkingLocation.text.toString()
         val rating: Rating = Rating(beer,
-            beer?.beer_name?.let { hashString(it).toHex() }, selectedRating, drunkDate, drinkingLocation)
+            beer?.beer_name?.let { hashString(it).toHex() }, selectedRating, drunkDate, drinkingLocation, photoFile.absolutePath)
 
         beer?.let { dbHandler.addRating(it, rating) }
 

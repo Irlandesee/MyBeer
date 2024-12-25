@@ -172,12 +172,25 @@
                     android:contentDescription="Star 5"/>
             </LinearLayout>
 
-            <Button
-                android:id="@+id/btn_submit_rating"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Submit Rating" />
+                android:orientation="horizontal">
+                <Button
+                    android:id="@+id/btn_submit_rating"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Crea voto" />
+
+                <Button
+                    android:id="@+id/btn_take_photo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:text="Fai una foto"/>
+
+            </LinearLayout>
 
             <ImageView
                 android:id="@+id/iv_beer_picture"

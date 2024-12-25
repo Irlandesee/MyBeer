@@ -30,11 +30,6 @@
                 android:resource="@xml/file_paths"
                 />
         </provider>
-        <activity
-            android:name=".activities.ReportBeerActivity"
-            android:exported="false"/>
-        <activity android:name=".activities.ViewReportActivity"
-            android:exported="false"/>
         <activity android:name=".activities.SearchBreweriesActivity"
             android:exported="false"/>
         <activity android:name=".activities.LoginActivity" android:exported="false"/>

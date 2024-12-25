@@ -7,7 +7,8 @@ class Rating(
     val ratingId: String?,
     val rating: Int?,
     val drunkDate: String?,
-    val drunkLocation: String?
+    val drunkLocation: String?,
+    val photoUri: String?
 ): Serializable {
     override fun toString(): String {
         return "Rating[$beer, $rating, $drunkDate, $drunkLocation]"

@@ -65,7 +65,8 @@ class DatabaseHandler(context: Context,
                 "beer_name TEXT," + //10
                 "beer_picture_link TEXT," + //11
                 "beer_raters TEXT," + //12
-                "beer_style TEXT)") //13
+                "beer_style TEXT," + //13
+                "photo_uri TEXT)") //14
         initCategories(db)
     }
 
@@ -211,6 +212,7 @@ class DatabaseHandler(context: Context,
             put("beer_picture_link", beer.beer_picture_link)
             put("beer_raters", beer.beer_raters)
             put("beer_style", beer.beer_style)
+            put("photo_uri", rating.photoUri)
         }
         cursor.insert("ratings", null, values)
         cursor.close()
@@ -251,17 +253,10 @@ class DatabaseHandler(context: Context,
                 ratingsCursor.getInt(1),
                 ratingsCursor.getString(2),
                 ratingsCursor.getString(3),
+                ratingsCursor.getString(14)
                 ))
         }
         return ratings
-    }
-
-    fun getRating(beer: Beer): Int{
-        val db = readableDatabase
-        val cursor = db.rawQuery("select * from ratings where beer_id = ?", arrayOf(beer.beer_name_hex))
-        val rating = cursor.getInt(2)
-        cursor.close()
-        return rating
     }
 
 
