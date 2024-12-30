@@ -33,8 +33,7 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
             android:layout_margin="15dp"
-            android:contentDescription="TODO"
-            android:backgroundTint="@color/dark_blue"
+            android:backgroundTint="@color/purple"
             android:src="@drawable/baseline_menu_24"
             app:shapeAppearance="@style/ShapeAppearanceOverlay.Material3.Button" />
     </LinearLayout>
