@@ -75,7 +75,6 @@ class BeerViewHolder(listener: BeerClickListener, itemView: View): RecyclerView.
             listener.onLongClick(adapterPosition, beerContainer)
             true
         }
-        //ivPicture.setOnClickListener{ listener.onPictureClick(bindingAdapterPosition)}
 
     }
 

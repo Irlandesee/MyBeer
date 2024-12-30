@@ -91,7 +91,7 @@ class SearchBreweriesActivity : AppCompatActivity(),
 
     override fun onResumeFragments() {
         super.onResumeFragments()
-        if(permissionDenied) Toast.makeText(this, "Location permission denied", Toast.LENGTH_LONG).show()
+        if(permissionDenied) Toast.makeText(this, "Permessi posizione negati", Toast.LENGTH_LONG).show()
     }
 
     override fun onMapReady(map: GoogleMap) {
@@ -115,7 +115,7 @@ class SearchBreweriesActivity : AppCompatActivity(),
                 //googleMap.addMarker(MarkerOptions().position(userLocation).title("You are here"))
                 selectedBeer.beer_brewery?.let { addPlaceMarker(it) }
             }else{
-                Toast.makeText(this, "Location not available", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Luogo non disponibile", Toast.LENGTH_LONG).show()
             }
         }.addOnFailureListener{ e -> Toast.makeText(this, "Failed to get location ${e.message}", Toast.LENGTH_LONG).show()}
 
@@ -132,7 +132,7 @@ class SearchBreweriesActivity : AppCompatActivity(),
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(placeLocation, 15f))
             googleMap.addMarker(MarkerOptions().position(placeLocation).title(placeName))
         }else{
-            Toast.makeText(this, "Place couldn't be found: $placeName", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Non è stato possibile trovare: $placeName", Toast.LENGTH_LONG).show()
         }
     }
 

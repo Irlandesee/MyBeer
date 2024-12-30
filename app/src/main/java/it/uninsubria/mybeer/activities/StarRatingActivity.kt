@@ -140,8 +140,6 @@ class StarRatingActivity() : AppCompatActivity(){
         }
     }
 
-    private fun setupLaunchers(){
-    }
 
     private fun createImageFile(): File{
         val imageFileName = "JPEG_${System.currentTimeMillis()}_"

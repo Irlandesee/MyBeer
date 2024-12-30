@@ -36,7 +36,7 @@ class BeerActivity : AppCompatActivity(){
         if(userName == null && !isSessionActive(preferences)){
             val loginActivityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result ->
                 if(result.resultCode == RESULT_OK){
-                    Toast.makeText(baseContext, "Login ok", Toast.LENGTH_LONG).show()
+                    Log.d(TAG, "Login ok")
                 }
             }
             val intent = Intent(this, LoginActivity::class.java)
