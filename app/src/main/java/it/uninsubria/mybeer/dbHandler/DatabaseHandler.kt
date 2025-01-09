@@ -187,7 +187,7 @@ class DatabaseHandler(context: Context,
         val values = ContentValues().apply{
             put("id", user.id)
             put("password", user.password)
-            put("name", user.password)
+            put("name", user.name)
             put("surname", user.surname)
             put("beer_id", "")
         }
